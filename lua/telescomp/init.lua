@@ -34,9 +34,10 @@ local function complete(left, middle, right)
   local cmdline = string.gsub(left .. middle .. right, "<", "<lt>")
   local setcmdpos = "<C-R><C-R>=setcmdpos(" .. (vim.fn.strlen(left .. middle) + 1) .. ")[-1]<CR>"
   set_normal_mode()
-  vim.keymap.set('n', lhs.complete, lhs.colon .. cmdline .. setcmdpos, { remap = false })
+  local modes = { "n", "i", "c", "v", "x", "s", "o", "t", "l" }
+  vim.keymap.set(modes, lhs.complete, [[<C-\><C-N>]] .. lhs.colon .. cmdline .. setcmdpos, { remap = false })
   vim.api.nvim_feedkeys(termcodes.complete, "t", true)
-  vim.schedule(function() vim.keymap.del('n', lhs.complete) end)
+  vim.schedule(function() vim.keymap.del(modes, lhs.complete) end)
 end
 
 local function insert_ref()
