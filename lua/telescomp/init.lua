@@ -66,7 +66,8 @@ local function insert_ref()
   }):find()
 end
 
-set_keymap('c', '<Plug>(test)', function() pcall(insert_ref) end)
+-- set_keymap('c', '<Plug>(test)', function() pcall(insert_ref) end)
+set_keymap('c', '<Plug>(test)', insert_ref)
 set_keymap('c', '<C-X>', function() pcall(insert_ref) end)
 set_keymap('n', '<Space><Space>', ':ab  cd<Left><Left><Left><Plug>(test)')
 
