@@ -25,7 +25,7 @@ local function set_normal_mode()
   local modes = { "n", "i", "c", "v", "x", "s", "o", "t", "l" }
   vim.keymap.set(modes, lhs.normal, [[<C-\><C-N>]], { remap = false })
   vim.api.nvim_feedkeys(termcodes.normal, "t", true)
-  vim.keymap.del(modes, lhs.normal)
+  vim.schedule(function() vim.keymap.del('n', lhs.normal) end)
 end
 
 local function complete(left, middle, right)
@@ -36,7 +36,7 @@ local function complete(left, middle, right)
   set_normal_mode()
   vim.keymap.set('n', lhs.complete, lhs.colon .. cmdline .. setcmdpos, { remap = false })
   vim.api.nvim_feedkeys(termcodes.complete, "t", true)
-  vim.keymap.del('n', lhs.compete)
+  vim.schedule(function() vim.keymap.del('n', lhs.complete) end)
 end
 
 local function insert_ref()
