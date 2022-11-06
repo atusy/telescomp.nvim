@@ -22,10 +22,7 @@ local termcodes = vim.tbl_map(
 )
 
 local function set_normal_mode()
-  local modes = { "n", "i", "c", "v", "x", "s", "o", "t", "l" }
-  vim.keymap.set(modes, lhs.normal, [[<C-\><C-N>]], { remap = false })
-  vim.api.nvim_feedkeys(termcodes.normal, "t", true)
-  -- vim.schedule(function() vim.keymap.del(modes, lhs.normal) end)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes([[<C-\><C-N>]], true, false, true), "tn", true)
 end
 
 local function complete(left, middle, right)
