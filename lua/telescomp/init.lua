@@ -18,7 +18,7 @@ local function replace_termcodes(x)
 end
 
 local function feedkeys(x)
-  vim.api.nvim_feedkeys(x, 'tn', true)
+  vim.api.nvim_feedkeys(x, 'tn', false)
 end
 
 local function set_normal_mode()
