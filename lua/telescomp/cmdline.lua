@@ -97,6 +97,46 @@ function M.create_completer(opts)
   end
 end
 
+function M.create_menu(opts)
+  local menu = opts.menu
+  local menu_keys = {}
+  for k, _ in pairs(opts.menu) do
+    table.insert(menu_keys, k)
+  end
+
+  local opts_picker = copy(opts.opts or {})
+  opts_picker.previewer = opts_picker.previewer or false
+  opts_picker.prompt_title = opts_picker.prompt_title or 'Complete cmdline'
+  opts_picker.sorter = opts_picker.sorter or conf.generic_sorter({})
+  opts_picker.finder = finders.new_table({ results = menu_keys })
+
+  return function(_)
+    local curline = fn.getcmdline()
+    local curpos = fn.getcmdpos() - 1
+    opts_picker.attach_mappings = function(prompt_bufnr, map)
+      local _ = map
+      local completed = false
+      actions.select_default:replace(function()
+        completed = true
+        actions.close(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        menu[selection[1]]({ curline = curline, curpos = curpos })
+      end)
+      actions.close:enhance({
+        post = function()
+          if not completed then
+            local left, right = split_curline(curline, curpos)
+            complete(left, '', right)
+          end
+          return true
+        end
+      })
+      return true
+    end
+    pickers.new({}, opts_picker):find()
+  end
+end
+
 M.builtin = {}
 M.builtin.git_ref = M.create_completer({
   opts = {
@@ -108,11 +148,13 @@ M.builtin.git_ref = M.create_completer({
   }
 })
 M.builtin.find_files = M.create_completer({ picker = require('telescope.builtin').find_files })
+M.builtin.menu = M.create_menu({ menu = M.builtin })
 
 -- set_keymap('c', '<Plug>(test)', function() pcall(insert_ref) end)
 set_keymap('c', '<Plug>(test)', M.builtin.find_files)
 set_keymap('c', '<C-X><C-R>', function() pcall(M.builtin.git_ref) end)
 set_keymap('c', '<C-X><C-F>', function() pcall(M.builtin.find_files) end)
+set_keymap('c', '<C-X><C-X>', function() M.builtin.menu() end)
 set_keymap('n', '<Space><Space>', ':ab  cd<Left><Left><Left><Plug>(test)')
 
 function M.setup(opt)
