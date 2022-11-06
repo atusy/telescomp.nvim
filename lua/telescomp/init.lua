@@ -39,35 +39,39 @@ local function complete(left, middle, right)
   -- vim.schedule(function() vim.keymap.del(modes, lhs.complete) end)
 end
 
-function M.create_cmdline_completer(opt)
+local function insert_selection(left, right, modifier)
+  return function(prompt_bufnr, map)
+    local _ = map
+    actions.select_default:replace(function()
+      actions.close(prompt_bufnr)
+      -- TODO: support multiple selections (cf. https://github.com/nvim-telescope/telescope.nvim/issues/1048#issuecomment-889122232 )
+      local selection = action_state.get_selected_entry()
+      complete(left, modifier and modifier(selection) or selection[1], right)
+    end)
+    return true
+  end
+end
+
+function M.create_cmdline_completer(opts)
   return function()
     local curline = vim.fn.getcmdline()
     local curpos = vim.fn.getcmdpos() - 1
     local left = vim.fn.strpart(curline, 0, curpos)
     local right = vim.fn.strpart(curline, curpos)
     set_normal_mode() -- Exit from cmdline happens on entering telescope ui, but do it manually for sure
+    if opts.picker then
+      opts.picker({ attach_mappings = insert_selection(left, right, opts.fn_modify_selection) })
+      return
+    end
     pickers.new({}, {
-      previewer = opt.previewer or false,
-      prompt_title = opt.prompt_title or "Complete cmdline",
-      finder = opt.finder and opt.finder() or finders.new_table {
+      previewer = opts.previewer or false,
+      prompt_title = opts.prompt_title or "Complete cmdline",
+      finder = opts.finder and opts.finder() or finders.new_table {
         -- results = vim.fn.split(vim.fn.system([[git for-each-ref --format="%(refname:short)"]]), "\n")
-        results = opt.fn_candidates and opt.fn_candidates() or { 'example', '<Esc>' }
+        results = opts.fn_candidates and opts.fn_candidates() or { 'example', '<Esc>' }
       },
-      sorter = opt.sorter or conf.generic_sorter({}),
-      attach_mappings = function(prompt_bufnr, map)
-        local _ = map
-        actions.select_default:replace(function()
-          actions.close(prompt_bufnr)
-          -- TODO: support multiple selections (cf. https://github.com/nvim-telescope/telescope.nvim/issues/1048#issuecomment-889122232 )
-          local selection = action_state.get_selected_entry()
-          complete(
-            left,
-            opt.fn_modify_selection and opt.fn_modify_selection(selection) or selection[1],
-            right
-          )
-        end)
-        return true
-      end
+      sorter = opts.sorter or conf.generic_sorter({}),
+      attach_mappings = insert_selection(left, right, opts.fn_modify_selection)
       -- TODO: fallback to original cmdline when telescope ends without selections
     }):find()
   end
