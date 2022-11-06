@@ -83,7 +83,8 @@ function M.create_completer(opts)
   opts_picker.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
 
   return function(_opts)
-    local left, right = split_curline(_opts)
+    _opts = _opts or {}
+    local left, right = split_curline(_opts.curline, _opts.curpos)
     opts_picker.attach_mappings = insert_selection(left, right, format_selection)
     set_normal_mode() -- Exit from cmdline happens on entering telescope ui, but do it manually for sure
     if picker then
