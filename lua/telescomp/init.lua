@@ -3,36 +3,34 @@ local M = {}
 local set_keymap = vim.keymap.set
 
 
-local action_state = require "telescope.actions.state"
-local actions = require "telescope.actions"
-local pickers = require "telescope.pickers"
-local finders = require "telescope.finders"
-local conf = require("telescope.config").values
+local action_state = require 'telescope.actions.state'
+local actions = require 'telescope.actions'
+local pickers = require 'telescope.pickers'
+local finders = require 'telescope.finders'
+local conf = require('telescope.config').values
 
-local lhs = {
-  colon = "<Plug>(telescomp-colon)",
-  -- below are internals
-  complete = "<Plug>(telescomp-complete)",
-  normal = "<Plug>(telescomp-normal)",
+local plug = {
+  colon = '<Plug>(telescomp-colon)',
 }
 
-local termcodes = vim.tbl_map(
-  function(x) return vim.api.nvim_replace_termcodes(x, true, false, true) end,
-  lhs
-)
+local function replace_termcodes(x)
+  return vim.api.nvim_replace_termcodes(x, true, false, true)
+end
+
+local function feedkeys(x)
+  vim.api.nvim_feedkeys(x, 'tn', true)
+end
 
 local function set_normal_mode()
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes([[<C-\><C-N>]], true, false, true), "tn", true)
+  feedkeys(replace_termcodes([[<C-\><C-N>]]))
 end
 
 local function complete(left, middle, right)
   -- disable remapping by invoking <Plug> mapping instead of feedkeys
   -- if user want to use own `:`, then map <Plug>(telescomp-colon)
-  local cmdline = string.gsub(left .. middle .. right, "<", "<lt>")
-  local setcmdpos = "<C-R><C-R>=setcmdpos(" .. (vim.fn.strlen(left .. middle) + 1) .. ")[-1]<CR>"
-  local modes = { "n", "i", "c", "v", "x", "s", "o", "t", "l" }
-  vim.keymap.set(modes, lhs.complete, [[<C-\><C-N>]] .. lhs.colon .. cmdline .. setcmdpos, { remap = false })
-  vim.api.nvim_feedkeys(termcodes.complete, "t", true)
+  local cmdline = string.gsub(left .. middle .. right, '<', '<lt>')
+  local setcmdpos = '<C-R><C-R>=setcmdpos(' .. (vim.fn.strlen(left .. middle) + 1) .. ')[-1]<CR>'
+  feedkeys(replace_termcodes([[<C-\><C-N>]] .. plug.colon) .. cmdline .. replace_termcodes(setcmdpos))
   -- vim.schedule(function() vim.keymap.del(modes, lhs.complete) end)
 end
 
@@ -79,8 +77,8 @@ function M.create_cmdline_completer(opts)
       return
     end
     opts_picker.previewer = opts_picker.previewer or false
-    opts_picker.prompt_title = opts_picker.prompt_title or "Complete cmdline"
-    opts_picker.finder = type(finder) == "function" and finders.new_table(finder()) or finder
+    opts_picker.prompt_title = opts_picker.prompt_title or 'Complete cmdline'
+    opts_picker.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
     opts_picker.sorter = opts_picker.sorter or conf.generic_sorter({})
     pickers.new({}, opts_picker):find()
   end
@@ -111,7 +109,7 @@ set_keymap('n', '<Space><Space>', ':ab  cd<Left><Left><Left><Plug>(test)')
 set_keymap('', '<Space>k', function() vim.pretty_print(vim.api.nvim_get_mode()) end)
 
 function M.setup(opt)
-  vim.keymap.set("n", lhs.colon, [[:]], { remap = false })
+  vim.keymap.set('n', plug.colon, ':', { remap = false })
 end
 
 return M
