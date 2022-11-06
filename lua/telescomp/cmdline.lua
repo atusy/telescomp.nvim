@@ -1,6 +1,8 @@
-local vim = vim
-local M = {}
+local api = vim.api
+local fn = vim.fn
 local set_keymap = vim.keymap.set
+
+local M = {}
 
 
 local action_state = require 'telescope.actions.state'
@@ -14,11 +16,11 @@ local plug = {
 }
 
 local function replace_termcodes(x)
-  return vim.api.nvim_replace_termcodes(x, true, false, true)
+  return api.nvim_replace_termcodes(x, true, false, true)
 end
 
 local function feedkeys(x)
-  vim.api.nvim_feedkeys(x, 'n', false)
+  api.nvim_feedkeys(x, 'n', false)
 end
 
 local function set_normal_mode()
@@ -29,7 +31,7 @@ local function complete(left, middle, right)
   -- disable remapping by invoking <Plug> mapping instead of feedkeys
   -- if user want to use own `:`, then map <Plug>(telescomp-colon)
   local cmdline = string.gsub(left .. middle .. right, '<', '<lt>')
-  local setcmdpos = '<C-R><C-R>=setcmdpos(' .. (vim.fn.strlen(left .. middle) + 1) .. ')[-1]<CR>'
+  local setcmdpos = '<C-R><C-R>=setcmdpos(' .. (fn.strlen(left .. middle) + 1) .. ')[-1]<CR>'
   feedkeys(replace_termcodes([[<C-\><C-N>]] .. plug.colon) .. cmdline .. replace_termcodes(setcmdpos))
   -- vim.schedule(function() vim.keymap.del(modes, lhs.complete) end)
 end
@@ -67,10 +69,10 @@ function M.create_cmdline_completer(opts)
   opts_picker.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
 
   return function()
-    local curline = vim.fn.getcmdline()
-    local curpos = vim.fn.getcmdpos() - 1
-    local left = vim.fn.strpart(curline, 0, curpos)
-    local right = vim.fn.strpart(curline, curpos)
+    local curline = fn.getcmdline()
+    local curpos = fn.getcmdpos() - 1
+    local left = fn.strpart(curline, 0, curpos)
+    local right = fn.strpart(curline, curpos)
     opts_picker.attach_mappings = insert_selection(left, right, opts.fn_modify_selection)
     set_normal_mode() -- Exit from cmdline happens on entering telescope ui, but do it manually for sure
     if picker then
@@ -94,7 +96,7 @@ M.builtin_cmdline_completer.git_ref = M.create_cmdline_completer({
   opts = {
     finder = function()
       return {
-        results = vim.fn.split(vim.fn.system([[git for-each-ref --format="%(refname:short)"]]), "\n"),
+        results = fn.split(fn.system([[git for-each-ref --format="%(refname:short)"]]), "\n"),
       }
     end
   }
@@ -106,10 +108,9 @@ set_keymap('c', '<Plug>(test)', M.builtin_cmdline_completer.find_files)
 set_keymap('c', '<C-X><C-R>', function() pcall(M.builtin_cmdline_completer.git_ref) end)
 set_keymap('c', '<C-X><C-F>', function() pcall(M.builtin_cmdline_completer.find_files) end)
 set_keymap('n', '<Space><Space>', ':ab  cd<Left><Left><Left><Plug>(test)')
-set_keymap('', '<Space>k', function() vim.pretty_print(vim.api.nvim_get_mode()) end)
 
 function M.setup(opt)
-  vim.keymap.set('n', plug.colon, ':', { remap = false })
+  set_keymap('n', plug.colon, ':', { remap = false })
 end
 
 return M
