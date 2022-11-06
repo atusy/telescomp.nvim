@@ -111,9 +111,10 @@ function M.create_menu(opts)
   opts_picker.sorter = opts_picker.sorter or conf.generic_sorter({})
   opts_picker.finder = finders.new_table({ results = menu_keys })
 
-  return function(_)
-    local curline = fn.getcmdline()
-    local curpos = fn.getcmdpos() - 1
+  return function(_opts)
+    local _opts = _opts or {}
+    local curline = _opts.curline or fn.getcmdline()
+    local curpos = _opts.curpos or fn.getcmdpos() - 1
     opts_picker.attach_mappings = function(prompt_bufnr, map)
       local _ = map
       local completed = false
