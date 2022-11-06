@@ -64,6 +64,7 @@ function M.create_cmdline_completer(opts)
     opts_picker[k] = v
   end
   local finder = opts_picker.finder
+  opts_picker.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
 
   return function()
     local curline = vim.fn.getcmdline()
@@ -78,7 +79,6 @@ function M.create_cmdline_completer(opts)
     end
     opts_picker.previewer = opts_picker.previewer or false
     opts_picker.prompt_title = opts_picker.prompt_title or 'Complete cmdline'
-    opts_picker.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
     opts_picker.sorter = opts_picker.sorter or conf.generic_sorter({})
     pickers.new({}, opts_picker):find()
   end
