@@ -94,7 +94,7 @@ M.builtin_cmdline_completer.git_ref = M.create_cmdline_completer({
   opts = {
     finder = function()
       return {
-        results = vim.fn.split(vim.fn.system([[git for-each-ref --format="%(refname:short)"]]), "\n")
+        results = vim.fn.split(vim.fn.system([[git for-each-ref --format="%(refname:short)"]]), "\n"),
       }
     end
   }
