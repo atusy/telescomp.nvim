@@ -59,7 +59,7 @@ local function insert_selection(left, right, modifier)
   end
 end
 
-function M.create_cmdline_completer(opts)
+function M.create_completer(opts)
   local picker = opts.picker
   local opts_picker = {}
   for k, v in pairs(opts.opts or {}) do
@@ -86,13 +86,8 @@ function M.create_cmdline_completer(opts)
   end
 end
 
-M.builtin_cmdline_completer = {}
-M.builtin_cmdline_completer.example = M.create_cmdline_completer({
-  opts = { finder = finders.new_table({
-    results = { 'a', '<ESC>' }
-  }) }
-})
-M.builtin_cmdline_completer.git_ref = M.create_cmdline_completer({
+M.builtin = {}
+M.builtin.git_ref = M.create_completer({
   opts = {
     finder = function()
       return {
@@ -101,12 +96,12 @@ M.builtin_cmdline_completer.git_ref = M.create_cmdline_completer({
     end
   }
 })
-M.builtin_cmdline_completer.find_files = M.create_cmdline_completer({ picker = require('telescope.builtin').find_files })
+M.builtin.find_files = M.create_completer({ picker = require('telescope.builtin').find_files })
 
 -- set_keymap('c', '<Plug>(test)', function() pcall(insert_ref) end)
-set_keymap('c', '<Plug>(test)', M.builtin_cmdline_completer.find_files)
-set_keymap('c', '<C-X><C-R>', function() pcall(M.builtin_cmdline_completer.git_ref) end)
-set_keymap('c', '<C-X><C-F>', function() pcall(M.builtin_cmdline_completer.find_files) end)
+set_keymap('c', '<Plug>(test)', M.builtin.find_files)
+set_keymap('c', '<C-X><C-R>', function() pcall(M.builtin.git_ref) end)
+set_keymap('c', '<C-X><C-F>', function() pcall(M.builtin.find_files) end)
 set_keymap('n', '<Space><Space>', ':ab  cd<Left><Left><Left><Plug>(test)')
 
 function M.setup(opt)
