@@ -69,9 +69,9 @@ function M.create_completer(opts)
   local finder = opts_picker.finder
   opts_picker.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
 
-  return function()
-    local curline = fn.getcmdline()
-    local curpos = fn.getcmdpos() - 1
+  return function(opts)
+    local curline = opts.curline or fn.getcmdline()
+    local curpos = opts.curpos or (fn.getcmdpos() - 1)
     local left = fn.strpart(curline, 0, curpos)
     local right = fn.strpart(curline, curpos)
     opts_picker.attach_mappings = insert_selection(left, right, format_selection)
