@@ -63,41 +63,53 @@ local function insert_selection(left, right, modifier)
 end
 
 function M.create_cmdline_completer(opts)
+  local picker = opts.picker
+  local opts_picker = {}
+  for k, v in pairs(opts.opts or {}) do
+    opts_picker[k] = v
+  end
+  local finder = opts_picker.finder
+
   return function()
     local curline = vim.fn.getcmdline()
     local curpos = vim.fn.getcmdpos() - 1
     local left = vim.fn.strpart(curline, 0, curpos)
     local right = vim.fn.strpart(curline, curpos)
+    opts_picker.attach_mappings = insert_selection(left, right, opts.fn_modify_selection)
     set_normal_mode() -- Exit from cmdline happens on entering telescope ui, but do it manually for sure
-    if opts.picker then
-      opts.picker({ attach_mappings = insert_selection(left, right, opts.fn_modify_selection) })
+    if picker then
+      picker(opts_picker)
       return
     end
-    pickers.new({}, {
-      previewer = opts.previewer or false,
-      prompt_title = opts.prompt_title or "Complete cmdline",
-      finder = opts.finder and opts.finder() or finders.new_table {
-        -- results = vim.fn.split(vim.fn.system([[git for-each-ref --format="%(refname:short)"]]), "\n")
-        results = opts.fn_candidates and opts.fn_candidates() or { 'example', '<Esc>' }
-      },
-      sorter = opts.sorter or conf.generic_sorter({}),
-      attach_mappings = insert_selection(left, right, opts.fn_modify_selection)
-      -- TODO: fallback to original cmdline when telescope ends without selections
-    }):find()
+    opts_picker.previewer = opts_picker.previewer or false
+    opts_picker.prompt_title = opts_picker.prompt_title or "Complete cmdline"
+    opts_picker.finder = type(finder) == "function" and finders.new_table(finder()) or finder
+    opts_picker.sorter = opts_picker.sorter or conf.generic_sorter({})
+    pickers.new({}, opts_picker):find()
   end
 end
 
 M.builtin_cmdline_completer = {}
-M.builtin_cmdline_completer.example = M.create_cmdline_completer({})
-M.builtin_cmdline_completer.git_ref = M.create_cmdline_completer({
-  fn_candidates = function()
-    return vim.fn.split(vim.fn.system([[git for-each-ref --format="%(refname:short)"]]), "\n")
-  end
+M.builtin_cmdline_completer.example = M.create_cmdline_completer({
+  opts = { finder = finders.new_table({
+    results = { 'a', '<ESC>' }
+  }) }
 })
+M.builtin_cmdline_completer.git_ref = M.create_cmdline_completer({
+  opts = {
+    finder = function()
+      return {
+        results = vim.fn.split(vim.fn.system([[git for-each-ref --format="%(refname:short)"]]), "\n")
+      }
+    end
+  }
+})
+M.builtin_cmdline_completer.find_files = M.create_cmdline_completer({ picker = require('telescope.builtin').find_files })
 
 -- set_keymap('c', '<Plug>(test)', function() pcall(insert_ref) end)
-set_keymap('c', '<Plug>(test)', M.builtin_cmdline_completer.example)
-set_keymap('c', '<C-X>', function() pcall(M.builtin_cmdline_completer.example) end)
+set_keymap('c', '<Plug>(test)', M.builtin_cmdline_completer.find_files)
+set_keymap('c', '<C-X><C-R>', function() pcall(M.builtin_cmdline_completer.git_ref) end)
+set_keymap('c', '<C-X><C-F>', function() pcall(M.builtin_cmdline_completer.find_files) end)
 set_keymap('n', '<Space><Space>', ':ab  cd<Left><Left><Left><Plug>(test)')
 set_keymap('', '<Space>k', function() vim.pretty_print(vim.api.nvim_get_mode()) end)
 
