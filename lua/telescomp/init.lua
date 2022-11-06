@@ -33,7 +33,6 @@ local function complete(left, middle, right)
   -- if user want to use own `:`, then map <Plug>(telescomp-colon)
   local cmdline = string.gsub(left .. middle .. right, "<", "<lt>")
   local setcmdpos = "<C-R><C-R>=setcmdpos(" .. (vim.fn.strlen(left .. middle) + 1) .. ")[-1]<CR>"
-  set_normal_mode()
   local modes = { "n", "i", "c", "v", "x", "s", "o", "t", "l" }
   vim.keymap.set(modes, lhs.complete, [[<C-\><C-N>]] .. lhs.colon .. cmdline .. setcmdpos, { remap = false })
   vim.api.nvim_feedkeys(termcodes.complete, "t", true)
