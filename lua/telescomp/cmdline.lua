@@ -59,13 +59,18 @@ local function insert_selection(left, right, modifier)
   end
 end
 
+local function copy(x)
+  local ret = {}
+  for k, v in pairs(x) do
+    ret[k] = v
+  end
+  return ret
+end
+
 function M.create_completer(opts)
   local format_selection = opts.format_selection
   local picker = opts.picker
-  local opts_picker = {}
-  for k, v in pairs(opts.opts or {}) do
-    opts_picker[k] = v
-  end
+  local opts_picker = copy(opts.opts or {})
   local finder = opts_picker.finder
   opts_picker.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
 
