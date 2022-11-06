@@ -60,6 +60,7 @@ local function insert_selection(left, right, modifier)
 end
 
 function M.create_completer(opts)
+  local format_selection = opts.format_selection
   local picker = opts.picker
   local opts_picker = {}
   for k, v in pairs(opts.opts or {}) do
@@ -73,7 +74,7 @@ function M.create_completer(opts)
     local curpos = fn.getcmdpos() - 1
     local left = fn.strpart(curline, 0, curpos)
     local right = fn.strpart(curline, curpos)
-    opts_picker.attach_mappings = insert_selection(left, right, opts.fn_modify_selection)
+    opts_picker.attach_mappings = insert_selection(left, right, format_selection)
     set_normal_mode() -- Exit from cmdline happens on entering telescope ui, but do it manually for sure
     if picker then
       picker(opts_picker)
