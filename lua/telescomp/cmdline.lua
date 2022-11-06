@@ -67,6 +67,14 @@ local function copy(x)
   return ret
 end
 
+local function split_curline(curline, curpos)
+  curline = curline or fn.getcmdline()
+  curpos = curpos or (fn.getcmdpos() - 1)
+  local left = fn.strpart(curline, 0, curpos)
+  local right = fn.strpart(curline, curpos)
+  return left, right
+end
+
 function M.create_completer(opts)
   local format_selection = opts.format_selection
   local picker = opts.picker
@@ -75,10 +83,7 @@ function M.create_completer(opts)
   opts_picker.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
 
   return function(opts)
-    local curline = opts.curline or fn.getcmdline()
-    local curpos = opts.curpos or (fn.getcmdpos() - 1)
-    local left = fn.strpart(curline, 0, curpos)
-    local right = fn.strpart(curline, curpos)
+    local left, right = split_curline(opts)
     opts_picker.attach_mappings = insert_selection(left, right, format_selection)
     set_normal_mode() -- Exit from cmdline happens on entering telescope ui, but do it manually for sure
     if picker then
