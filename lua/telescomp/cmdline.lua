@@ -30,6 +30,10 @@ local function complete(left, middle, right)
 end
 
 local function insert_selection(left, middle, right, modifier)
+  left = left or ''
+  middle = middle or ''
+  right = right or ''
+  modifier = modifier or function(selection) return selection[1] end
   return function(prompt_bufnr, map)
     local _ = map
     local completed = false
@@ -38,7 +42,7 @@ local function insert_selection(left, middle, right, modifier)
       actions.close(prompt_bufnr)
       -- TODO: support multiple selections (cf. https://github.com/nvim-telescope/telescope.nvim/issues/1048#issuecomment-889122232 )
       local selection = action_state.get_selected_entry()
-      complete(left, modifier and modifier(selection) or selection[1], right)
+      complete(left, modifier(selection), right)
     end)
     actions.close:enhance({
       post = function()
