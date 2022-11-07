@@ -146,41 +146,6 @@ function M.create_menu(opts)
   end
 end
 
-M.builtin = {}
-M.builtin.git_ref = M.create_completer({
-  opts = {
-    finder = function()
-      return {
-        results = fn.split(fn.system(
-          [[git for-each-ref --format="%(refname:short)"]]
-        ), "\n"),
-      }
-    end
-  }
-})
-M.builtin.find_files = M.create_completer({
-  picker = require('telescope.builtin').find_files
-})
-M.builtin.menu = M.create_menu({ menu = M.builtin })
-
--- set_keymap('c', '<Plug>(test)', function() pcall(insert_ref) end)
-set_keymap('c', '<C-X><C-R>', M.builtin.git_ref)
-set_keymap('c', '<C-X><C-F>', M.builtin.find_files)
-set_keymap('c', '<C-X><C-M>', M.builtin.menu)
-set_keymap('c', '<C-X><C-X>', function()
-  local opt = M.spec_completer_options({ expand = true })
-  local default_text = opt.default_text
-  if string.match(default_text, '^%./') ~= nil then
-    opt.default_text = string.gsub(default_text, '^%./', '')
-    return M.builtin.find_files({}, opt)
-  end
-  if string.match(default_text, '/') ~= nil then
-    return M.builtin.find_files({}, opt)
-  end
-
-  return M.builtin.menu({}, opt)
-end)
-
 function M.setup(_)
   set_keymap('n', plug[":"], ':', { remap = false })
   set_keymap('n', plug["/"], '/', { remap = false })
