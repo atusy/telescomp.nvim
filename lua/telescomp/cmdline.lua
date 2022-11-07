@@ -121,7 +121,6 @@ function M.create_menu(opts)
   end
 
   local opts_picker_default = merge({
-    previewer = false,
     prompt_title = 'Complete cmdline',
     sorter = conf.generic_sorter({}),
     finder = finders.new_table({ results = menu_keys }),
@@ -131,20 +130,15 @@ function M.create_menu(opts)
     opts_comp = M.spec_completer_options(opts_comp)
 
     opts_picker = merge(opts_picker_default, opts_picker)
-    opts_picker.attach_mappings = function(prompt_bufnr, map)
-      local _ = map
-      local completed = false
+    opts_picker.attach_mappings = function(prompt_bufnr, _)
       actions.select_default:replace(function()
-        completed = true
+        actions.close:enhance({ post = function() end })
         actions.close(prompt_bufnr)
-        local selection = action_state.get_selected_entry()
-        menu[selection[1]]({}, opts_comp)
+        menu[action_state.get_selected_entry()[1]]({}, opts_comp)
       end)
       actions.close:enhance({
         post = function()
-          if not completed then
-            set_cmdline(opts_comp.cmdtype, opts_comp.left .. opts_comp.middle, opts_comp.right)
-          end
+          set_cmdline(opts_comp.cmdtype, opts_comp.left .. opts_comp.middle, opts_comp.right)
         end
       })
       return true
