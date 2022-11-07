@@ -152,7 +152,7 @@ function M.create_menu(opts)
       actions.close:enhance({
         post = function()
           if not completed then
-            complete(opts_comp.left, opts_comp.middle, opts_comp.right)
+            complete(opts_comp.left .. opts_comp.middle, opts_comp.right)
           end
           return true
         end
