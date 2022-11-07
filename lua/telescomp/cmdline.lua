@@ -85,7 +85,7 @@ function M.spec_completer_options(opts)
     opts.middle = opts.middle or ''
     opts.right = opts.right or ''
   end
-  opts.default_text = opts.middle
+  opts.default_text = opts.default_text or opts.middle
   opts.cmdtype = opts.cmdtype or fn.getcmdtype()
   return opts
 end
