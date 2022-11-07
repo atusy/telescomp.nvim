@@ -82,9 +82,9 @@ function M.create_completer(opts)
   local finder = opts_picker.finder
   opts_picker.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
 
-  return function(_opts)
-    _opts = _opts or {}
-    local left, right = split_curline(_opts.curline, _opts.curpos)
+  return function(_opts, curline, curpos)
+    _opts = copy(_opts or {})
+    local left, right = split_curline(curline, curpos)
     opts_picker.attach_mappings = insert_selection(left, right, format_selection)
     set_normal_mode() -- Exit from cmdline happens on entering telescope ui, but do it manually for sure
     if picker then
@@ -111,10 +111,10 @@ function M.create_menu(opts)
   opts_picker.sorter = opts_picker.sorter or conf.generic_sorter({})
   opts_picker.finder = finders.new_table({ results = menu_keys })
 
-  return function(_opts)
+  return function(_opts, curline, curpos)
     _opts = _opts or {}
-    local curline = _opts.curline or fn.getcmdline()
-    local curpos = _opts.curpos or fn.getcmdpos() - 1
+    curline = curline or fn.getcmdline()
+    curpos = curpos or fn.getcmdpos() - 1
     opts_picker.attach_mappings = function(prompt_bufnr, map)
       local _ = map
       local completed = false
@@ -122,7 +122,7 @@ function M.create_menu(opts)
         completed = true
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
-        menu[selection[1]]({ curline = curline, curpos = curpos })
+        menu[selection[1]]({}, curline, curpos)
       end)
       actions.close:enhance({
         post = function()
