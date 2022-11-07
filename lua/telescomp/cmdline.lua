@@ -22,7 +22,7 @@ local plug = {
   ["?"] = '<Plug>(telescomp-question)',
 }
 
-local function complete(cmdtype, left, right)
+local function set_cmdline(cmdtype, left, right)
   -- if user want to use own `:`, then map <Plug>(telescomp-colon)
   local cmdline = left .. right
   local cmdpos = fn.strlen(left) + 1
@@ -47,12 +47,12 @@ local function insert_selection(cmdtype, left, middle, right, modifier)
       actions.close(prompt_bufnr)
       -- TODO: support multiple selections (cf. https://github.com/nvim-telescope/telescope.nvim/issues/1048#issuecomment-889122232 )
       local selection = action_state.get_selected_entry()
-      complete(cmdtype, left .. modifier(selection), right)
+      set_cmdline(cmdtype, left .. modifier(selection), right)
     end)
     actions.close:enhance({
       post = function()
         if not completed then
-          complete(cmdtype, left .. middle, right)
+          set_cmdline(cmdtype, left .. middle, right)
         end
         return true
       end
@@ -160,7 +160,7 @@ function M.create_menu(opts)
       actions.close:enhance({
         post = function()
           if not completed then
-            complete(opts_comp.left .. opts_comp.middle, opts_comp.right)
+            set_cmdline(opts_comp.left .. opts_comp.middle, opts_comp.right)
           end
           return true
         end
