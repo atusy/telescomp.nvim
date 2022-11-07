@@ -14,7 +14,6 @@ local feedkeys = utils.feedkeys
 local actions = require 'telescope.actions'
 local pickers = require 'telescope.pickers'
 local finders = require 'telescope.finders'
-local conf = require('telescope.config').values
 
 local plug = {
   [":"] = '<Plug>(telescomp-colon)',
