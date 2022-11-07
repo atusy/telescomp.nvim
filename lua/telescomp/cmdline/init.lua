@@ -167,11 +167,6 @@ M.builtin.menu = M.create_menu({ menu = M.builtin })
 set_keymap('c', '<C-X><C-R>', M.builtin.git_ref)
 set_keymap('c', '<C-X><C-F>', M.builtin.find_files)
 set_keymap('c', '<C-X><C-M>', M.builtin.menu)
-set_keymap('c', '<C-X><C-K>', M.create_completer({
-  opts = {
-    finder = function() return { results = { '<Esc>' } } end
-  }
-}))
 set_keymap('c', '<C-X><C-X>', function()
   local opt = M.spec_completer_options({ expand = true })
   local default_text = opt.default_text
