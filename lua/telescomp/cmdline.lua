@@ -156,7 +156,7 @@ function M.create_menu(opts)
       actions.close:enhance({
         post = function()
           if not completed then
-            set_cmdline(opts_comp.left .. opts_comp.middle, opts_comp.right)
+            set_cmdline(opts_comp.cmdtype, opts_comp.left .. opts_comp.middle, opts_comp.right)
           end
           return true
         end
