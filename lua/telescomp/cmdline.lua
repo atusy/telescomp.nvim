@@ -67,6 +67,14 @@ local function copy(x)
   return ret
 end
 
+local function merge(x, y)
+  local ret = x and copy(x) or {}
+  for k, v in pairs(y or {}) do
+    ret[k] = v
+  end
+  return ret
+end
+
 local function split_curline(curline, curpos)
   curline = curline or fn.getcmdline()
   curpos = curpos or (fn.getcmdpos() - 1)
@@ -78,23 +86,28 @@ end
 function M.create_completer(opts)
   local format_selection = opts.format_selection
   local picker = opts.picker
-  local opts_picker = copy(opts.opts or {})
-  local finder = opts_picker.finder
-  opts_picker.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
+  local opts_picker_default = copy(opts.opts or {})
+  local finder = opts_picker_default.finder
+  opts_picker_default.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
 
-  return function(_opts, curline, curpos)
-    _opts = copy(_opts or {})
-    local left, right = split_curline(curline, curpos)
+  return function(opts_picker, opts_completion)
+    opts_completion = opts_completion or {}
+    local left, right = split_curline(opts_completion.curline, opts_completion.curpos)
+    opts_picker = merge(opts_picker_default, opts_picker)
     opts_picker.attach_mappings = insert_selection(left, right, format_selection)
     set_normal_mode() -- Exit from cmdline happens on entering telescope ui, but do it manually for sure
     if picker then
       picker(opts_picker)
       return
     end
-    opts_picker.previewer = opts_picker.previewer or false
-    opts_picker.prompt_title = opts_picker.prompt_title or 'Complete cmdline'
-    opts_picker.sorter = opts_picker.sorter or conf.generic_sorter({})
-    pickers.new({}, opts_picker):find()
+    pickers.new(
+      {},
+      merge({
+        previewer = false,
+        prompt_title = 'Complete cmdline',
+        sortrer = conf.generic_sorter({})
+      }, opts_picker)
+    ):find()
   end
 end
 
@@ -105,16 +118,18 @@ function M.create_menu(opts)
     table.insert(menu_keys, k)
   end
 
-  local opts_picker = copy(opts.opts or {})
-  opts_picker.previewer = opts_picker.previewer or false
-  opts_picker.prompt_title = opts_picker.prompt_title or 'Complete cmdline'
-  opts_picker.sorter = opts_picker.sorter or conf.generic_sorter({})
-  opts_picker.finder = finders.new_table({ results = menu_keys })
+  local opts_picker_default = merge({
+    previewer = false,
+    prompt_title = 'Complete cmdline',
+    sorter = conf.generic_sorter({}),
+    finder = finders.new_table({ results = menu_keys }),
+  }, opts.opts)
 
-  return function(_opts, curline, curpos)
-    _opts = _opts or {}
-    curline = curline or fn.getcmdline()
-    curpos = curpos or fn.getcmdpos() - 1
+  return function(opts_picker, opts_completion)
+    opts_picker = merge(opts_picker_default, opts_picker)
+    opts_completion = opts_completion or {}
+    opts_completion.curline = opts_completion.curline or fn.getcmdline()
+    opts_completion.curpos = opts_completion.curpos or fn.getcmdpos() - 1
     opts_picker.attach_mappings = function(prompt_bufnr, map)
       local _ = map
       local completed = false
@@ -122,12 +137,12 @@ function M.create_menu(opts)
         completed = true
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
-        menu[selection[1]]({}, curline, curpos)
+        menu[selection[1]]({}, opts_completion)
       end)
       actions.close:enhance({
         post = function()
           if not completed then
-            local left, right = split_curline(curline, curpos)
+            local left, right = split_curline(opts_completion.curline, opts_completion.curpos)
             complete(left, '', right)
           end
           return true
