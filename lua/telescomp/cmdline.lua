@@ -112,7 +112,7 @@ function M.create_menu(opts)
   opts_picker.finder = finders.new_table({ results = menu_keys })
 
   return function(_opts)
-    local _opts = _opts or {}
+    _opts = _opts or {}
     local curline = _opts.curline or fn.getcmdline()
     local curpos = _opts.curpos or fn.getcmdpos() - 1
     opts_picker.attach_mappings = function(prompt_bufnr, map)
