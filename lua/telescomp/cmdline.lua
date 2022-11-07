@@ -41,20 +41,14 @@ local function insert_selection(opts, formatter)
   local format = formatter or function(selection) return selection[1] end
   return function(prompt_bufnr, map)
     local _ = map
-    local completed = false
     actions.select_default:replace(function()
-      completed = true
-      actions.close(prompt_bufnr)
       -- TODO: support multiple selections (cf. https://github.com/nvim-telescope/telescope.nvim/issues/1048#issuecomment-889122232 )
-      local selection = action_state.get_selected_entry()
-      set_cmdline(opts.cmdtype, left .. format(selection), right)
+      middle = format(action_state.get_selected_entry())
+      actions.close(prompt_bufnr)
     end)
     actions.close:enhance({
       post = function()
-        if not completed then
-          set_cmdline(opts.cmdtype, left .. middle, right)
-        end
-        return true
+        set_cmdline(opts.cmdtype, left .. middle, right)
       end
     })
     return true
@@ -158,7 +152,6 @@ function M.create_menu(opts)
           if not completed then
             set_cmdline(opts_comp.cmdtype, opts_comp.left .. opts_comp.middle, opts_comp.right)
           end
-          return true
         end
       })
       return true
