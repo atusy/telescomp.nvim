@@ -95,8 +95,9 @@ function M.create_completer(opts)
   local format_selection = opts.format_selection
   local picker = opts.picker
   local opts_picker_default = copy(opts.opts or {})
-  local finder = opts_picker_default.finder
-  opts_picker_default.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
+  if type(opts_picker_default.finder) == 'function' then
+    opts_picker_default.finder = finders.new_table(opts_picker_default.finder())
+  end
 
   return function(opts_picker, opts_comp)
     opts_comp = M.spec_completer_options(opts_comp)
