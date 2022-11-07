@@ -20,10 +20,10 @@ local plug = {
   colon = '<Plug>(telescomp-colon)',
 }
 
-local function complete(left, middle, right)
+local function complete(left, right)
   -- if user want to use own `:`, then map <Plug>(telescomp-colon)
-  local cmdline = left .. middle .. right
-  local cmdpos = fn.strlen(left .. middle) + 1
+  local cmdline = left .. right
+  local cmdpos = fn.strlen(left) + 1
   local setcmdpos = '<C-R><C-R>=setcmdpos(' .. cmdpos .. ')[-1]<CR>'
   feedkeys(
     replace_termcodes([[<C-\><C-N>]] .. plug.colon)
@@ -45,12 +45,12 @@ local function insert_selection(left, middle, right, modifier)
       actions.close(prompt_bufnr)
       -- TODO: support multiple selections (cf. https://github.com/nvim-telescope/telescope.nvim/issues/1048#issuecomment-889122232 )
       local selection = action_state.get_selected_entry()
-      complete(left, modifier(selection), right)
+      complete(left .. modifier(selection), right)
     end)
     actions.close:enhance({
       post = function()
         if not completed then
-          complete(left, middle, right)
+          complete(left .. middle, right)
         end
         return true
       end
