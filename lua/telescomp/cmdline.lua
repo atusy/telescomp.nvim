@@ -56,13 +56,13 @@ local function insert_selection(left, middle, right, modifier)
   end
 end
 
-local function split_curline(curline, curpos, expand)
-  curline = curline or fn.getcmdline()
-  curpos = curpos or (fn.getcmdpos() - 1)
+local function split_curline(arg)
+  local curline = arg.curline or fn.getcmdline()
+  local curpos = arg.curpos or (fn.getcmdpos() - 1)
   local left = fn.strpart(curline, 0, curpos)
   local middle = ''
   local right = fn.strpart(curline, curpos)
-  if expand then
+  if arg.expand then
     local matchlist = fn.matchlist(left, [[^\(.* \|\)\([^ ]\+\)$]])
     if #matchlist > 0 then
       left = matchlist[2]
@@ -70,6 +70,14 @@ local function split_curline(curline, curpos, expand)
     end
   end
   return left, middle, right
+end
+
+local function fix_completer_options(opts)
+  opts = merge({ expand = true }, opts)
+  if opts.left == nil then
+    opts.left, opts.middle, opts.right = split_curline(opts)
+  end
+  return opts
 end
 
 function M.create_completer(opts)
@@ -80,16 +88,13 @@ function M.create_completer(opts)
   opts_picker_default.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
 
   return function(opts_picker, opts_comp)
-    opts_comp = opts_comp or {}
-    local left, middle, right = split_curline(
-      opts_comp.curline,
-      opts_comp.curpos,
-      opts_comp.expand == false and false or true
-    )
+    opts_comp = fix_completer_options(opts_comp)
 
     opts_picker = merge(opts_picker_default, opts_picker)
-    opts_picker.default_text = middle
-    opts_picker.attach_mappings = insert_selection(left, middle, right, format_selection)
+    opts_picker.default_text = opts_comp.middle
+    opts_picker.attach_mappings = insert_selection(
+      opts_comp.left, opts_comp.middle, opts_comp.right, format_selection
+    )
 
     -- set normal mode
     -- entering telescope ui infers it, but do it manually for sure
@@ -126,10 +131,9 @@ function M.create_menu(opts)
   }, opts.opts)
 
   return function(opts_picker, opts_comp)
+    opts_comp = fix_completer_options(opts_comp)
+
     opts_picker = merge(opts_picker_default, opts_picker)
-    opts_comp = opts_comp or {}
-    opts_comp.curline = opts_comp.curline or fn.getcmdline()
-    opts_comp.curpos = opts_comp.curpos or fn.getcmdpos() - 1
     opts_picker.attach_mappings = function(prompt_bufnr, map)
       local _ = map
       local completed = false
@@ -142,15 +146,36 @@ function M.create_menu(opts)
       actions.close:enhance({
         post = function()
           if not completed then
-            local left, right = split_curline(opts_comp.curline, opts_comp.curpos)
-            complete(left, '', right)
+            complete(opts_comp.left, opts_comp.middle, opts_comp.right)
           end
           return true
         end
       })
       return true
     end
+
     pickers.new({}, opts_picker):find()
+  end
+end
+
+function M.create_smart_completer(choice)
+  choice = choice or {
+    {
+      trigger = function(args)
+        return string.match(args.middle, "/") ~= nil
+      end,
+      completer = M.builtin.find_files
+    }
+  }
+
+  return function(opts_picker, opts_comp)
+    opts_comp = fix_completer_options(opts_comp)
+    for _, v in ipairs(choice) do
+      if v.trigger(opts_comp) then
+        v.completer(opts_picker, opts_comp)
+        return
+      end
+    end
   end
 end
 
