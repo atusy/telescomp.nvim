@@ -21,12 +21,15 @@ local plug = {
 }
 
 local function complete(left, middle, right)
-  -- disable remapping by invoking <Plug> mapping instead of feedkeys
   -- if user want to use own `:`, then map <Plug>(telescomp-colon)
-  local cmdline = string.gsub(left .. middle .. right, '<', '<lt>')
-  local setcmdpos = '<C-R><C-R>=setcmdpos(' .. (fn.strlen(left .. middle) + 1) .. ')[-1]<CR>'
-  feedkeys(replace_termcodes([[<C-\><C-N>]] .. plug.colon) .. cmdline .. replace_termcodes(setcmdpos))
-  -- vim.schedule(function() vim.keymap.del(modes, lhs.complete) end)
+  local cmdline = left .. middle .. right
+  local cmdpos = fn.strlen(left .. middle) + 1
+  local setcmdpos = '<C-R><C-R>=setcmdpos(' .. cmdpos .. ')[-1]<CR>'
+  feedkeys(
+    replace_termcodes([[<C-\><C-N>]] .. plug.colon)
+    .. cmdline
+    .. replace_termcodes(setcmdpos)
+  )
 end
 
 local function insert_selection(left, middle, right, modifier)
