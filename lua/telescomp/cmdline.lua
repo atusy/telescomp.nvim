@@ -83,6 +83,7 @@ function M.spec_completer_options(opts)
     opts.middle = opts.middle or ''
     opts.right = opts.right or ''
   end
+  opts.default_text = opts.middle
   return opts
 end
 
@@ -97,7 +98,7 @@ function M.create_completer(opts)
     opts_comp = M.spec_completer_options(opts_comp)
 
     opts_picker = merge(opts_picker_default, opts_picker)
-    opts_picker.default_text = opts_comp.middle
+    opts_picker.default_text = opts_comp.default_text
     opts_picker.attach_mappings = insert_selection(
       opts_comp.left, opts_comp.middle, opts_comp.right, format_selection
     )
@@ -189,12 +190,12 @@ set_keymap('c', '<C-X><C-X>', function() M.builtin.menu() end)
 set_keymap('n', '<Space><Space>', ':ab  cd<Left><Left><Left><Plug>(test)')
 set_keymap('c', '<C-X><C-X>', function()
   local opt = M.spec_completer_options({ expand = true })
-  local middle = opt.middle
-  if string.match(middle, '^%./') ~= nil then
-    opt.middle = string.gsub(middle, '^%./', '')
+  local default_text = opt.default_text
+  if string.match(default_text, '^%./') ~= nil then
+    opt.default_text = string.gsub(default_text, '^%./', '')
     return M.builtin.find_files({}, opt)
   end
-  if string.match(middle, '/') ~= nil then
+  if string.match(default_text, '/') ~= nil then
     return M.builtin.find_files({}, opt)
   end
 
