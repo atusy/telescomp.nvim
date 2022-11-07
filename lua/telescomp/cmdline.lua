@@ -63,7 +63,7 @@ local function split_curline(curline, curpos, expand)
   local middle = ''
   local right = fn.strpart(curline, curpos)
   if expand then
-    local matchlist = fn.matchlist(left, [[^\(.* \|\)\([^ ]\)$]])
+    local matchlist = fn.matchlist(left, [[^\(.* \|\)\([^ ]\+\)$]])
     if #matchlist > 0 then
       left = matchlist[2]
       middle = matchlist[3]
