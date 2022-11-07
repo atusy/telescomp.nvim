@@ -34,11 +34,11 @@ local function set_cmdline(cmdtype, left, right)
   )
 end
 
-local function insert_selection(cmdtype, left, middle, right, modifier)
-  left = left or ''
-  middle = middle or ''
-  right = right or ''
-  modifier = modifier or function(selection) return selection[1] end
+local function insert_selection(opts, formatter)
+  local left = opts.left or ''
+  local middle = opts.middle or ''
+  local right = opts.right or ''
+  local format = formatter or function(selection) return selection[1] end
   return function(prompt_bufnr, map)
     local _ = map
     local completed = false
@@ -47,12 +47,12 @@ local function insert_selection(cmdtype, left, middle, right, modifier)
       actions.close(prompt_bufnr)
       -- TODO: support multiple selections (cf. https://github.com/nvim-telescope/telescope.nvim/issues/1048#issuecomment-889122232 )
       local selection = action_state.get_selected_entry()
-      set_cmdline(cmdtype, left .. modifier(selection), right)
+      set_cmdline(opts.cmdtype, left .. format(selection), right)
     end)
     actions.close:enhance({
       post = function()
         if not completed then
-          set_cmdline(cmdtype, left .. middle, right)
+          set_cmdline(opts.cmdtype, left .. middle, right)
         end
         return true
       end
@@ -92,25 +92,19 @@ function M.spec_completer_options(opts)
 end
 
 function M.create_completer(opts)
-  local format_selection = opts.format_selection
+  local formatter_default = opts.formatter
   local picker = opts.picker
   local opts_picker_default = copy(opts.opts or {})
   if type(opts_picker_default.finder) == 'function' then
     opts_picker_default.finder = finders.new_table(opts_picker_default.finder())
   end
 
-  return function(opts_picker, opts_comp)
+  return function(opts_picker, opts_comp, formatter)
     opts_comp = M.spec_completer_options(opts_comp)
 
     opts_picker = merge(opts_picker_default, opts_picker)
     opts_picker.default_text = opts_comp.default_text
-    opts_picker.attach_mappings = insert_selection(
-      opts_comp.cmdtype,
-      opts_comp.left,
-      opts_comp.middle,
-      opts_comp.right,
-      format_selection
-    )
+    opts_picker.attach_mappings = insert_selection(opts_comp, formatter or formatter_default)
 
     -- set normal mode
     -- entering telescope ui infers it, but do it manually for sure
