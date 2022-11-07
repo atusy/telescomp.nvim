@@ -72,7 +72,7 @@ local function split_curline(arg)
   return left, middle, right
 end
 
-local function fix_completer_options(opts)
+function M.spec_completer_options(opts)
   opts = merge({ expand = true }, opts)
   if opts.left == nil then
     opts.left, opts.middle, opts.right = split_curline(opts)
@@ -88,7 +88,7 @@ function M.create_completer(opts)
   opts_picker_default.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
 
   return function(opts_picker, opts_comp)
-    opts_comp = fix_completer_options(opts_comp)
+    opts_comp = M.spec_completer_options(opts_comp)
 
     opts_picker = merge(opts_picker_default, opts_picker)
     opts_picker.default_text = opts_comp.middle
@@ -131,7 +131,7 @@ function M.create_menu(opts)
   }, opts.opts)
 
   return function(opts_picker, opts_comp)
-    opts_comp = fix_completer_options(opts_comp)
+    opts_comp = M.spec_completer_options(opts_comp)
 
     opts_picker = merge(opts_picker_default, opts_picker)
     opts_picker.attach_mappings = function(prompt_bufnr, map)
@@ -158,27 +158,6 @@ function M.create_menu(opts)
   end
 end
 
-function M.create_smart_completer(choice)
-  choice = choice or {
-    {
-      trigger = function(args)
-        return string.match(args.middle, "/") ~= nil
-      end,
-      completer = M.builtin.find_files
-    }
-  }
-
-  return function(opts_picker, opts_comp)
-    opts_comp = fix_completer_options(opts_comp)
-    for _, v in ipairs(choice) do
-      if v.trigger(opts_comp) then
-        v.completer(opts_picker, opts_comp)
-        return
-      end
-    end
-  end
-end
-
 M.builtin = {}
 M.builtin.git_ref = M.create_completer({
   opts = {
@@ -202,6 +181,19 @@ set_keymap('c', '<C-X><C-R>', function() pcall(M.builtin.git_ref) end)
 set_keymap('c', '<C-X><C-F>', function() pcall(M.builtin.find_files) end)
 set_keymap('c', '<C-X><C-X>', function() M.builtin.menu() end)
 set_keymap('n', '<Space><Space>', ':ab  cd<Left><Left><Left><Plug>(test)')
+set_keymap('c', '<C-X><C-X>', function()
+  local opt = M.spec_completer_options({ expand = true })
+  local middle = opt.middle
+  if string.match(middle, '^%./') ~= nil then
+    opt.middle = string.gsub(middle, '^%./', '')
+    return M.builtin.find_files({}, opt)
+  end
+  if string.match(middle, '/') ~= nil then
+    return M.builtin.find_files({}, opt)
+  end
+
+  return M.builtin.menu({}, opt)
+end)
 
 function M.setup(opt)
   set_keymap('n', plug.colon, ':', { remap = false })
