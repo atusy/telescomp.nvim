@@ -1,4 +1,3 @@
-local api = vim.api
 local fn = vim.fn
 local set_keymap = vim.keymap.set
 
@@ -6,6 +5,12 @@ local M = {}
 
 
 local action_state = require 'telescope.actions.state'
+local utils = require 'telescomp.utils'
+local copy = utils.copy
+local merge = utils.merge
+local replace_termcodes = utils.replace_termcodes
+local feedkeys = utils.feedkeys
+
 local actions = require 'telescope.actions'
 local pickers = require 'telescope.pickers'
 local finders = require 'telescope.finders'
@@ -14,18 +19,6 @@ local conf = require('telescope.config').values
 local plug = {
   colon = '<Plug>(telescomp-colon)',
 }
-
-local function replace_termcodes(x)
-  return api.nvim_replace_termcodes(x, true, false, true)
-end
-
-local function feedkeys(x)
-  api.nvim_feedkeys(x, 'n', false)
-end
-
-local function set_normal_mode()
-  feedkeys(replace_termcodes([[<C-\><C-N>]]))
-end
 
 local function complete(left, middle, right)
   -- disable remapping by invoking <Plug> mapping instead of feedkeys
@@ -57,22 +50,6 @@ local function insert_selection(left, middle, right, modifier)
     })
     return true
   end
-end
-
-local function copy(x)
-  local ret = {}
-  for k, v in pairs(x) do
-    ret[k] = v
-  end
-  return ret
-end
-
-local function merge(x, y)
-  local ret = x and copy(x) or {}
-  for k, v in pairs(y or {}) do
-    ret[k] = v
-  end
-  return ret
 end
 
 local function split_curline(curline, curpos, expand)
@@ -110,7 +87,9 @@ function M.create_completer(opts)
     opts_picker.default_text = middle
     opts_picker.attach_mappings = insert_selection(left, middle, right, format_selection)
 
-    set_normal_mode() -- Exit from cmdline happens on entering telescope ui, but do it manually for sure
+    -- set normal mode
+    -- entering telescope ui infers it, but do it manually for sure
+    feedkeys(replace_termcodes([[<C-\><C-N>]]))
 
     if picker then
       picker(opts_picker)
