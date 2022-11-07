@@ -79,6 +79,9 @@ function M.spec_completer_options(opts)
   opts = merge({ expand = true }, opts)
   if opts.left == nil then
     opts.left, opts.middle, opts.right = split_curline(opts)
+  else
+    opts.middle = opts.middle or ''
+    opts.right = opts.right or ''
   end
   return opts
 end
