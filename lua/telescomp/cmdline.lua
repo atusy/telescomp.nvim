@@ -27,6 +27,9 @@ local function set_cmdline(cmdtype, left, right)
   local cmdline = left .. right
   local cmdpos = fn.strlen(left) + 1
   local setcmdpos = '<C-R><C-R>=setcmdpos(' .. cmdpos .. ')[-1]<CR>'
+  if not plug[cmdtype] then
+    error("telescomp does not support cmdtype " .. cmdtype)
+  end
   feedkeys(
     replace_termcodes([[<C-\><C-N>]] .. plug[cmdtype])
     .. cmdline
@@ -104,19 +107,9 @@ function M.create_completer(opts)
     -- entering telescope ui infers it, but do it manually for sure
     feedkeys(replace_termcodes([[<C-\><C-N>]]))
 
-    if picker then
-      picker(opts_picker)
-      return
-    end
+    if picker then return picker(opts_picker) end
 
-    pickers.new(
-      {},
-      merge({
-        previewer = false,
-        prompt_title = 'Complete cmdline',
-        sortrer = conf.generic_sorter({})
-      }, opts_picker)
-    ):find()
+    pickers.new({}, merge({ prompt_title = 'Complete cmdline', }, opts_picker)):find()
   end
 end
 
