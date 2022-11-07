@@ -18,6 +18,8 @@ local conf = require('telescope.config').values
 
 local plug = {
   [":"] = '<Plug>(telescomp-colon)',
+  ["/"] = '<Plug>(telescomp-slash)',
+  ["?"] = '<Plug>(telescomp-question)',
 }
 
 local function complete(cmdtype, left, right)
@@ -212,6 +214,8 @@ end)
 
 function M.setup(_)
   set_keymap('n', plug[":"], ':', { remap = false })
+  set_keymap('n', plug["/"], '/', { remap = false })
+  set_keymap('n', plug["?"], '?', { remap = false })
 end
 
 return M
