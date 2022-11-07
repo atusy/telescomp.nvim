@@ -36,7 +36,7 @@ local function complete(left, middle, right)
   -- vim.schedule(function() vim.keymap.del(modes, lhs.complete) end)
 end
 
-local function insert_selection(left, right, modifier)
+local function insert_selection(left, middle, right, modifier)
   return function(prompt_bufnr, map)
     local _ = map
     local completed = false
@@ -50,7 +50,7 @@ local function insert_selection(left, right, modifier)
     actions.close:enhance({
       post = function()
         if not completed then
-          complete(left, '', right)
+          complete(left, middle, right)
         end
         return true
       end
@@ -75,12 +75,20 @@ local function merge(x, y)
   return ret
 end
 
-local function split_curline(curline, curpos)
+local function split_curline(curline, curpos, expand)
   curline = curline or fn.getcmdline()
   curpos = curpos or (fn.getcmdpos() - 1)
   local left = fn.strpart(curline, 0, curpos)
+  local middle = ''
   local right = fn.strpart(curline, curpos)
-  return left, right
+  if expand then
+    local matchlist = fn.matchlist(left, [[^\(.* \|\)\([^ ]\)$]])
+    if #matchlist > 0 then
+      left = matchlist[2]
+      middle = matchlist[3]
+    end
+  end
+  return left, middle, right
 end
 
 function M.create_completer(opts)
@@ -92,14 +100,23 @@ function M.create_completer(opts)
 
   return function(opts_picker, opts_completion)
     opts_completion = opts_completion or {}
-    local left, right = split_curline(opts_completion.curline, opts_completion.curpos)
+    local left, middle, right = split_curline(
+      opts_completion.curline,
+      opts_completion.curpos,
+      opts_completion.expand == false and false or true
+    )
+
     opts_picker = merge(opts_picker_default, opts_picker)
-    opts_picker.attach_mappings = insert_selection(left, right, format_selection)
+    opts_picker.default_text = middle
+    opts_picker.attach_mappings = insert_selection(left, middle, right, format_selection)
+
     set_normal_mode() -- Exit from cmdline happens on entering telescope ui, but do it manually for sure
+
     if picker then
       picker(opts_picker)
       return
     end
+
     pickers.new(
       {},
       merge({
