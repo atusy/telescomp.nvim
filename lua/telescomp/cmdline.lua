@@ -121,7 +121,7 @@ function M.create_menu(opts)
   end
 
   local opts_picker_default = merge({
-    prompt_title = 'Complete cmdline',
+    prompt_title = 'Complete cmdline with ...',
     sorter = conf.generic_sorter({}),
     finder = finders.new_table({ results = menu_keys }),
   }, opts.opts)
