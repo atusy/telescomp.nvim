@@ -17,22 +17,22 @@ local finders = require 'telescope.finders'
 local conf = require('telescope.config').values
 
 local plug = {
-  colon = '<Plug>(telescomp-colon)',
+  [":"] = '<Plug>(telescomp-colon)',
 }
 
-local function complete(left, right)
+local function complete(cmdtype, left, right)
   -- if user want to use own `:`, then map <Plug>(telescomp-colon)
   local cmdline = left .. right
   local cmdpos = fn.strlen(left) + 1
   local setcmdpos = '<C-R><C-R>=setcmdpos(' .. cmdpos .. ')[-1]<CR>'
   feedkeys(
-    replace_termcodes([[<C-\><C-N>]] .. plug.colon)
+    replace_termcodes([[<C-\><C-N>]] .. plug[cmdtype])
     .. cmdline
     .. replace_termcodes(setcmdpos)
   )
 end
 
-local function insert_selection(left, middle, right, modifier)
+local function insert_selection(cmdtype, left, middle, right, modifier)
   left = left or ''
   middle = middle or ''
   right = right or ''
@@ -45,12 +45,12 @@ local function insert_selection(left, middle, right, modifier)
       actions.close(prompt_bufnr)
       -- TODO: support multiple selections (cf. https://github.com/nvim-telescope/telescope.nvim/issues/1048#issuecomment-889122232 )
       local selection = action_state.get_selected_entry()
-      complete(left .. modifier(selection), right)
+      complete(cmdtype, left .. modifier(selection), right)
     end)
     actions.close:enhance({
       post = function()
         if not completed then
-          complete(left .. middle, right)
+          complete(cmdtype, left .. middle, right)
         end
         return true
       end
@@ -84,6 +84,7 @@ function M.spec_completer_options(opts)
     opts.right = opts.right or ''
   end
   opts.default_text = opts.middle
+  opts.cmdtype = opts.cmdtype or fn.getcmdtype()
   return opts
 end
 
@@ -100,7 +101,11 @@ function M.create_completer(opts)
     opts_picker = merge(opts_picker_default, opts_picker)
     opts_picker.default_text = opts_comp.default_text
     opts_picker.attach_mappings = insert_selection(
-      opts_comp.left, opts_comp.middle, opts_comp.right, format_selection
+      opts_comp.cmdtype,
+      opts_comp.left,
+      opts_comp.middle,
+      opts_comp.right,
+      format_selection
     )
 
     -- set normal mode
@@ -183,11 +188,14 @@ M.builtin.find_files = M.create_completer({
 M.builtin.menu = M.create_menu({ menu = M.builtin })
 
 -- set_keymap('c', '<Plug>(test)', function() pcall(insert_ref) end)
-set_keymap('c', '<Plug>(test)', M.builtin.find_files)
-set_keymap('c', '<C-X><C-R>', function() pcall(M.builtin.git_ref) end)
-set_keymap('c', '<C-X><C-F>', function() pcall(M.builtin.find_files) end)
-set_keymap('c', '<C-X><C-X>', function() M.builtin.menu() end)
-set_keymap('n', '<Space><Space>', ':ab  cd<Left><Left><Left><Plug>(test)')
+set_keymap('c', '<C-X><C-R>', M.builtin.git_ref)
+set_keymap('c', '<C-X><C-F>', M.builtin.find_files)
+set_keymap('c', '<C-X><C-M>', M.builtin.menu)
+set_keymap('c', '<C-X><C-K>', M.create_completer({
+  opts = {
+    finder = function() return { results = { '<Esc>' } } end
+  }
+}))
 set_keymap('c', '<C-X><C-X>', function()
   local opt = M.spec_completer_options({ expand = true })
   local default_text = opt.default_text
@@ -202,8 +210,8 @@ set_keymap('c', '<C-X><C-X>', function()
   return M.builtin.menu({}, opt)
 end)
 
-function M.setup(opt)
-  set_keymap('n', plug.colon, ':', { remap = false })
+function M.setup(_)
+  set_keymap('n', plug[":"], ':', { remap = false })
 end
 
 return M
