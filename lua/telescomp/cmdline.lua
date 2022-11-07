@@ -159,12 +159,16 @@ M.builtin.git_ref = M.create_completer({
   opts = {
     finder = function()
       return {
-        results = fn.split(fn.system([[git for-each-ref --format="%(refname:short)"]]), "\n"),
+        results = fn.split(fn.system(
+          [[git for-each-ref --format="%(refname:short)"]]
+        ), "\n"),
       }
     end
   }
 })
-M.builtin.find_files = M.create_completer({ picker = require('telescope.builtin').find_files })
+M.builtin.find_files = M.create_completer({
+  picker = require('telescope.builtin').find_files
+})
 M.builtin.menu = M.create_menu({ menu = M.builtin })
 
 -- set_keymap('c', '<Plug>(test)', function() pcall(insert_ref) end)
