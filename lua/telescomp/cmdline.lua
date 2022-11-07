@@ -98,12 +98,12 @@ function M.create_completer(opts)
   local finder = opts_picker_default.finder
   opts_picker_default.finder = type(finder) == 'function' and finders.new_table(finder()) or finder
 
-  return function(opts_picker, opts_completion)
-    opts_completion = opts_completion or {}
+  return function(opts_picker, opts_comp)
+    opts_comp = opts_comp or {}
     local left, middle, right = split_curline(
-      opts_completion.curline,
-      opts_completion.curpos,
-      opts_completion.expand == false and false or true
+      opts_comp.curline,
+      opts_comp.curpos,
+      opts_comp.expand == false and false or true
     )
 
     opts_picker = merge(opts_picker_default, opts_picker)
@@ -142,11 +142,11 @@ function M.create_menu(opts)
     finder = finders.new_table({ results = menu_keys }),
   }, opts.opts)
 
-  return function(opts_picker, opts_completion)
+  return function(opts_picker, opts_comp)
     opts_picker = merge(opts_picker_default, opts_picker)
-    opts_completion = opts_completion or {}
-    opts_completion.curline = opts_completion.curline or fn.getcmdline()
-    opts_completion.curpos = opts_completion.curpos or fn.getcmdpos() - 1
+    opts_comp = opts_comp or {}
+    opts_comp.curline = opts_comp.curline or fn.getcmdline()
+    opts_comp.curpos = opts_comp.curpos or fn.getcmdpos() - 1
     opts_picker.attach_mappings = function(prompt_bufnr, map)
       local _ = map
       local completed = false
@@ -154,12 +154,12 @@ function M.create_menu(opts)
         completed = true
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
-        menu[selection[1]]({}, opts_completion)
+        menu[selection[1]]({}, opts_comp)
       end)
       actions.close:enhance({
         post = function()
           if not completed then
-            local left, right = split_curline(opts_completion.curline, opts_completion.curpos)
+            local left, right = split_curline(opts_comp.curline, opts_comp.curpos)
             complete(left, '', right)
           end
           return true
