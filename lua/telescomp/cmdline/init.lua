@@ -36,16 +36,20 @@ local function set_cmdline(cmdtype, left, right)
   )
 end
 
+local function format_default(tbl)
+  return table.concat(vim.tbl_map(function(x) return x[1] end, tbl), ' ')
+end
+
 local function insert_selection(opts, formatter)
   local left = opts.left or ''
   local middle = opts.middle or ''
   local right = opts.right or ''
-  local format = formatter or function(selection) return selection[1] end
+  local format = formatter or format_default
   return function(prompt_bufnr, map)
     local _ = map
     actions.select_default:replace(function()
-      -- TODO: support multiple selections (cf. https://github.com/nvim-telescope/telescope.nvim/issues/1048#issuecomment-889122232 )
-      middle = format(action_state.get_selected_entry())
+      local selections = action_state.get_current_picker(prompt_bufnr):get_multi_selection()
+      middle = format(#selections > 1 and selections or { action_state.get_selected_entry() })
       actions.close(prompt_bufnr)
     end)
     actions.close:enhance({
