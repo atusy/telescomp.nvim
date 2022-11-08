@@ -14,6 +14,7 @@ local feedkeys = utils.feedkeys
 local actions = require 'telescope.actions'
 local pickers = require 'telescope.pickers'
 local finders = require 'telescope.finders'
+local conf = require("telescope.config").values
 
 local plug = {
   [":"] = '<Plug>(telescomp-colon)',
@@ -112,7 +113,10 @@ function M.create_completer(opts)
 
     if picker then return picker(opts_picker) end
 
-    pickers.new({}, merge({ prompt_title = 'Complete cmdline', }, opts_picker)):find()
+    pickers.new({}, merge({
+      sorter = conf.generic_sorter({}),
+      prompt_title = 'Complete cmdline',
+    }, opts_picker)):find()
   end
 end
 
@@ -126,6 +130,7 @@ function M.create_menu(opts)
   local opts_picker_default = merge({
     prompt_title = 'Complete cmdline with ...',
     finder = finders.new_table({ results = menu_keys }),
+    sorter = conf.generic_sorter({}),
   }, opts.opts)
 
   return function(opts_picker, opts_comp)
