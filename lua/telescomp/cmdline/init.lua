@@ -95,9 +95,6 @@ end
 function M.create_completer(opts)
   local picker = opts.picker
   local opts_picker_default = copy(opts.opts_picker or {})
-  if type(opts_picker_default.finder) == 'function' then
-    opts_picker_default.finder = finders.new_table(opts_picker_default.finder())
-  end
   local opts_comp_default = opts.opts_completer or {}
 
   return function(opts_picker, opts_comp)
@@ -106,6 +103,9 @@ function M.create_completer(opts)
     opts_picker = merge(opts_picker_default, opts_picker)
     opts_picker.default_text = opts_comp.default_text
     opts_picker.attach_mappings = insert_selection(opts_comp)
+    if type(opts_picker.finder) == 'function' then
+      opts_picker.finder = finders.new_table(opts_picker.finder())
+    end
 
     -- set normal mode
     -- entering telescope ui infers it, but do it manually for sure
