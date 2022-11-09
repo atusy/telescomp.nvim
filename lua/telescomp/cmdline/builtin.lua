@@ -4,7 +4,7 @@ local cmdline = require('telescomp.cmdline')
 local M = {}
 
 M.git_ref = cmdline.create_completer({
-  opts = {
+  opts_picker = {
     finder = function()
       return {
         results = fn.split(fn.system(

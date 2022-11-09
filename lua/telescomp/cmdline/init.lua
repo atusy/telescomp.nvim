@@ -41,11 +41,11 @@ local function format_default(tbl)
   return table.concat(vim.tbl_map(function(x) return x[1] end, tbl), ' ')
 end
 
-local function insert_selection(opts, formatter)
+local function insert_selection(opts)
   local left = opts.left or ''
   local middle = opts.middle or ''
   local right = opts.right or ''
-  local format = formatter or format_default
+  local format = opts.formatter or format_default
   return function(prompt_bufnr, map)
     local _ = map
     actions.select_default:replace(function()
@@ -93,19 +93,19 @@ function M.spec_completer_options(opts)
 end
 
 function M.create_completer(opts)
-  local formatter_default = opts.formatter
   local picker = opts.picker
-  local opts_picker_default = copy(opts.opts or {})
+  local opts_picker_default = copy(opts.opts_picker or {})
   if type(opts_picker_default.finder) == 'function' then
     opts_picker_default.finder = finders.new_table(opts_picker_default.finder())
   end
+  local opts_comp_default = opts.opts_completer or {}
 
-  return function(opts_picker, opts_comp, formatter)
-    opts_comp = M.spec_completer_options(opts_comp)
+  return function(opts_picker, opts_comp)
+    opts_comp = M.spec_completer_options(merge(opts_comp_default, opts_comp))
 
     opts_picker = merge(opts_picker_default, opts_picker)
     opts_picker.default_text = opts_comp.default_text
-    opts_picker.attach_mappings = insert_selection(opts_comp, formatter or formatter_default)
+    opts_picker.attach_mappings = insert_selection(opts_comp)
 
     -- set normal mode
     -- entering telescope ui infers it, but do it manually for sure
