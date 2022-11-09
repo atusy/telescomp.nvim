@@ -21,4 +21,5 @@ end)
 
 return {
   cmdline = cmdline,
+  setup = function(_) end,
 }
