@@ -161,4 +161,6 @@ function M.setup(_)
   set_keymap('n', plug["?"], '?', { remap = false })
 end
 
+M.setup()
+
 return M
