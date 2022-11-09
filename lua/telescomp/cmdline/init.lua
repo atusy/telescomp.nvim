@@ -92,10 +92,10 @@ function M.spec_completer_options(opts)
   return opts
 end
 
-function M.create_completer(opts)
-  local picker = opts.picker
-  local opts_picker_default = copy(opts.opts_picker or {})
-  local opts_comp_default = opts.opts_completer or {}
+function M.create_completer(args)
+  local picker = args.picker
+  local opts_picker_default = copy(args.opts_picker or {})
+  local opts_comp_default = args.opts_completer or {}
 
   return function(opts_picker, opts_comp)
     opts_comp = M.spec_completer_options(merge(opts_comp_default, opts_comp))
@@ -120,10 +120,10 @@ function M.create_completer(opts)
   end
 end
 
-function M.create_menu(opts)
-  local menu = opts.menu
+function M.create_menu(args)
+  local menu = args.menu
   local menu_keys = {}
-  for k, _ in pairs(opts.menu) do
+  for k, _ in pairs(args.menu) do
     table.insert(menu_keys, k)
   end
 
@@ -131,7 +131,7 @@ function M.create_menu(opts)
     prompt_title = 'Complete cmdline with ...',
     finder = finders.new_table({ results = menu_keys }),
     sorter = conf.generic_sorter({}),
-  }, opts.opts)
+  }, args.opts)
 
   return function(opts_picker, opts_comp)
     opts_comp = M.spec_completer_options(opts_comp)
