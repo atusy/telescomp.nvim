@@ -21,7 +21,4 @@ end)
 
 return {
   cmdline = cmdline,
-  setup = function(opt)
-    cmdline.setup(opt)
-  end
 }
