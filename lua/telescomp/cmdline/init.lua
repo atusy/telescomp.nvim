@@ -48,7 +48,7 @@ local function format_default(tbl)
   return table.concat(vim.tbl_map(function(x) return x[1] end, tbl), ' ')
 end
 
-local function insert_selection(opts)
+local function picker_mappings(opts)
   local left = opts.left or ''
   local middle = opts.middle or ''
   local right = opts.right or ''
@@ -110,7 +110,7 @@ function M.create_completer(args)
 
     opts_picker = merge(opts_picker_default, opts_picker)
     opts_picker.default_text = opts_comp.default_text
-    opts_picker.attach_mappings = insert_selection(opts_comp)
+    opts_picker.attach_mappings = picker_mappings(opts_comp)
     if type(opts_picker.finder) == 'function' then
       opts_picker.finder = finders.new_table(opts_picker.finder())
     end
