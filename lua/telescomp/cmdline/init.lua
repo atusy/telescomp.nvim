@@ -109,7 +109,7 @@ function M.create_completer(args)
     opts_comp = M.spec_completer_options(merge(opts_comp_default, opts_comp))
 
     opts_picker = merge(opts_picker_default, opts_picker)
-    opts_picker.default_text = opts_comp.default_text
+    opts_picker.default_text = opts_comp.default_text or opts_picker.default_text
     opts_picker.attach_mappings = picker_mappings(opts_comp)
     if type(opts_picker.finder) == 'function' then
       opts_picker.finder = finders.new_table(opts_picker.finder())
