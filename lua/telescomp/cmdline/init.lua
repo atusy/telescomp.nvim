@@ -1,5 +1,5 @@
 local fn = vim.fn
-local set_keymap = vim.keymap.set
+local keymap = vim.keymap
 
 local M = {}
 
@@ -16,25 +16,32 @@ local pickers = require 'telescope.pickers'
 local finders = require 'telescope.finders'
 local conf = require("telescope.config").values
 
-local plug = {
+local plug_cmd = {
   [":"] = '<Plug>(telescomp-colon)',
   ["/"] = '<Plug>(telescomp-slash)',
   ["?"] = '<Plug>(telescomp-question)',
 }
+local plug_internal = '<Plug>(telescomp-cmd-internal)'
 
 local function set_cmdline(cmdtype, left, right)
-  -- if user want to use own `:`, then map <Plug>(telescomp-colon)
-  local cmdline = left .. right
-  local cmdpos = fn.strlen(left) + 1
-  local setcmdpos = '<C-R><C-R>=setcmdpos(' .. cmdpos .. ')[-1]<CR>'
-  if not plug[cmdtype] then
+  if not plug_cmd[cmdtype] then
     error("telescomp does not support cmdtype " .. cmdtype)
   end
-  feedkeys(
-    replace_termcodes([[<C-\><C-N>]] .. plug[cmdtype])
-    .. cmdline
-    .. replace_termcodes(setcmdpos)
-  )
+
+  -- one time keymap that sets the cmdline and cmdpos
+  keymap.set('c', plug_internal, function()
+    -- cmdline can be set directly via feedkeys, but I guess this is more robust
+    -- see d810570 for the implementation with feedkeys
+    fn.setcmdline(left .. right)
+    fn.setcmdpos(fn.strlen(left) + 1)
+    keymap.del('c', plug_internal)
+  end)
+
+  feedkeys(replace_termcodes(
+    [[<C-\><C-N>]] -- ensure normal mode as next plug mapping is defined in normal mode
+    .. plug_cmd[cmdtype] -- enter command line of the specific type
+    .. plug_internal-- set cmdline and cmdpos
+  ))
 end
 
 local function format_default(tbl)
@@ -157,9 +164,9 @@ function M.create_menu(args)
 end
 
 function M.setup(_)
-  set_keymap('n', plug[":"], ':', { remap = false })
-  set_keymap('n', plug["/"], '/', { remap = false })
-  set_keymap('n', plug["?"], '?', { remap = false })
+  keymap.set('n', plug_cmd[":"], ':', { remap = false })
+  keymap.set('n', plug_cmd["/"], '/', { remap = false })
+  keymap.set('n', plug_cmd["?"], '?', { remap = false })
 end
 
 M.setup()
