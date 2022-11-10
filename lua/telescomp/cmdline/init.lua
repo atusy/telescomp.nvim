@@ -23,7 +23,7 @@ local plug_cmd = {
 }
 local plug_internal = '<Plug>(telescomp-cmd-internal)'
 
-local function set_cmdline(cmdtype, left, right)
+local function complete_cmdline(cmdtype, left, right)
   if not plug_cmd[cmdtype] then
     error("telescomp does not support cmdtype " .. cmdtype)
   end
@@ -62,7 +62,7 @@ local function insert_selection(opts)
     end)
     actions.close:enhance({
       post = function()
-        set_cmdline(opts.cmdtype, left .. middle, right)
+        complete_cmdline(opts.cmdtype, left .. middle, right)
       end
     })
     return true
@@ -153,7 +153,7 @@ function M.create_menu(args)
       end)
       actions.close:enhance({
         post = function()
-          set_cmdline(opts_comp.cmdtype, opts_comp.left .. opts_comp.middle, opts_comp.right)
+          complete_cmdline(opts_comp.cmdtype, opts_comp.left .. opts_comp.middle, opts_comp.right)
         end
       })
       return true
