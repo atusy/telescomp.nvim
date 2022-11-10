@@ -35,7 +35,7 @@ This function takes a table, and returns a function.
 - `picker`: A picker to be extended (e.g., `require('telescope.builtin').find_files`) or `nil`. `nil` creates a new picker.
 - `opts_picker`: Options for picker. Note that `finder` field can be a function that returns a table to be passed to `require('telescope.finders').new_table`. If the value is function, then the field is replaced by its return value before passing to a picker. See example at **Create `find_git_branch`**.
 - `opts_comp`: Options for completion. Two of the fields are often used.
-    - `expand`: Bool (default: `true`). On completion, string on the left of the cursor is used as default text of **Telescope**. Then, the string will be expanded, replaced in other words. If `false`, default text is always blank, and no expansions happen.
+    - `expand`: Bool (default: `true`). On completion, *inner Word* on the cursor is used as default text of **Telescope**. Then, the string will be expanded, replaced in other words. If `false`, default text is always blank, and no expansions happen.
     - `formatter`: A function that receives a list of selections. By default, selected items are concatenated with space as a separator.
 
       ``` lua

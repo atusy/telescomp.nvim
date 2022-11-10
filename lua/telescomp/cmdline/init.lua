@@ -23,7 +23,7 @@ local plug_cmd = {
 }
 local plug_internal = '<Plug>(telescomp-cmd-internal)'
 
-local function complete_cmdline(cmdtype, left, right)
+local function complete_cmdline(cmdtype, cmdline, cmdpos)
   if not plug_cmd[cmdtype] then
     error("telescomp does not support cmdtype " .. cmdtype)
   end
@@ -32,8 +32,8 @@ local function complete_cmdline(cmdtype, left, right)
   keymap.set('c', plug_internal, function()
     -- cmdline can be set directly via feedkeys, but I guess this is more robust
     -- see d810570 for the implementation with feedkeys
-    fn.setcmdline(left .. right)
-    fn.setcmdpos(fn.strlen(left) + 1)
+    fn.setcmdline(cmdline)
+    fn.setcmdpos(cmdpos)
     keymap.del('c', plug_internal)
   end)
 
@@ -49,52 +49,61 @@ local function format_default(tbl)
 end
 
 local function picker_mappings(opts)
-  local left = opts.left or ''
-  local middle = opts.middle or ''
-  local right = opts.right or ''
-  local format = opts.formatter or format_default
+  local cmdline = opts.cmdline or ''
+  local cmdpos = opts.cmdpos or (fn.strlen(cmdline) + 1)
   return function(prompt_bufnr, map)
     local _ = map
     actions.select_default:replace(function()
       local selections = action_state.get_current_picker(prompt_bufnr):get_multi_selection()
-      middle = format(#selections > 1 and selections or { action_state.get_selected_entry() })
+      local middle = opts.formatter(
+        #selections > 1 and selections or { action_state.get_selected_entry() }
+      )
+      cmdline = opts.left .. middle .. opts.right
+      cmdpos = fn.strlen(cmdline) + 1
       actions.close(prompt_bufnr)
     end)
     actions.close:enhance({
       post = function()
-        complete_cmdline(opts.cmdtype, left .. middle, right)
+        complete_cmdline(opts.cmdtype, cmdline, cmdpos)
       end
     })
     return true
   end
 end
 
-local function split_curline(arg)
-  local curline = arg.curline or fn.getcmdline()
-  local curpos = arg.curpos or (fn.getcmdpos() - 1)
-  local left = fn.strpart(curline, 0, curpos)
-  local middle = ''
-  local right = fn.strpart(curline, curpos)
+local function parse_cmdline(arg)
+  local ret = {}
+  ret.cmdline = arg.curline or fn.getcmdline()
+  ret.cmdpos = arg.curpos or (fn.getcmdpos() - 1)
+  ret.left = fn.strpart(ret.cmdline, 0, ret.cmdpos)
+  ret.right = fn.strpart(ret.cmdline, ret.cmdpos)
+  ret.default_text = ''
+
   if arg.expand then
-    local matchlist = fn.matchlist(left, [[^\(.* \|\)\([^ ]\+\)$]])
-    if #matchlist > 0 then
-      left = matchlist[2]
-      middle = matchlist[3]
+    local matchlist_left = fn.matchlist(ret.left, [[^\(.* \|\)\([^ ]\+\)$]])
+    if #matchlist_left > 0 then
+      ret.left = matchlist_left[2]
+      ret.default_text = matchlist_left[3] .. ret.default_text
+    end
+    local matchlist_right = fn.matchlist(ret.right, [[^\([^ ]\+\)\( .*\|\)]])
+    if #matchlist_right > 0 then
+      ret.default_text = ret.default_text .. matchlist_right[2]
+      ret.right = matchlist_right[3]
     end
   end
-  return left, middle, right
+
+  return ret
 end
 
 function M.spec_completer_options(opts)
   opts = merge({ expand = true }, opts)
-  if opts.left == nil and opts.middle == nil and opts.right == nil then
-    opts.left, opts.middle, opts.right = split_curline(opts)
+  if opts.left == nil and opts.right == nil then
+    opts = merge(parse_cmdline(opts), opts)
   else
     opts.left = opts.left or ''
-    opts.middle = opts.middle or ''
     opts.right = opts.right or ''
+    opts.default_text = opts.default_text or ''
   end
-  opts.default_text = opts.default_text or opts.middle
   opts.cmdtype = opts.cmdtype or fn.getcmdtype()
   opts.formatter = opts.formatter or format_default
   return opts
@@ -103,10 +112,10 @@ end
 function M.create_completer(args)
   local picker = args.picker
   local opts_picker_default = copy(args.opts_picker or {})
-  local opts_comp_default = args.opts_completer or {}
+  local opts_comp_user_default = args.opts_completer or {}
 
   return function(opts_picker, opts_comp)
-    opts_comp = M.spec_completer_options(merge(opts_comp_default, opts_comp))
+    opts_comp = M.spec_completer_options(merge(opts_comp_user_default, opts_comp))
 
     opts_picker = merge(opts_picker_default, opts_picker)
     opts_picker.default_text = opts_comp.default_text or opts_picker.default_text
