@@ -163,7 +163,7 @@ function M.create_menu(args)
       end)
       actions.close:enhance({
         post = function()
-          complete_cmdline(opts_comp.cmdtype, opts_comp.left .. opts_comp.middle, opts_comp.right)
+          complete_cmdline(opts_comp.cmdtype, opts_comp.cmdline, opts_comp.cmdpos)
         end
       })
       return true
