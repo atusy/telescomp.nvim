@@ -169,6 +169,9 @@ function M.create_menu(args)
       return true
     end
 
+    -- set normal mode
+    -- entering telescope ui infers it, but do it manually for sure
+    feedkeys(replace_termcodes([[<C-\><C-N>]]))
     pickers.new({}, opts_picker):find()
   end
 end
