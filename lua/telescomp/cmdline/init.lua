@@ -155,6 +155,7 @@ function M.create_menu(args)
     opts_comp = M.spec_completer_options(opts_comp)
 
     opts_picker = merge(opts_picker_default, opts_picker)
+    opts_picker.layout_config = opts_picker.layout_config or { anchor = "SW" }
     opts_picker.attach_mappings = function(prompt_bufnr, _)
       actions.select_default:replace(function()
         actions.close:enhance({ post = function() end })
