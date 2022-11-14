@@ -72,4 +72,29 @@ M.find_files = cmdline.create_completer({
 
 M.menu = cmdline.create_menu({ menu = M })
 
-return M
+local formatters = setmetatable({
+  git_branches = function(x) return x.value end,
+  git_commits = function(x) return x.value end,
+  git_status = function(x) return x.path end,
+  lsp_workspace_symbols = function(x) return x.symbol_name end,
+  lsp_document_symbols = function(x) return x.symbol_name end,
+}, {
+  __index = function(_, _)
+    return function(x) return x[1] or x.value or x.path or x.filename end
+  end
+})
+
+return setmetatable(M, {
+  __index = function(_, key)
+    local formatter_one = formatters[key]
+    local function formatter(tbl)
+      -- vim.pretty_print(tbl[1])
+      return table.concat(vim.tbl_map(formatter_one, tbl), ' ')
+    end
+
+    return cmdline.create_completer({
+      picker = require('telescope.builtin')[key],
+      opts_completer = { formatter = formatter }
+    })
+  end
+})
