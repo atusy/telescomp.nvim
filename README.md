@@ -18,6 +18,9 @@ Fuzzy completion powered by telescope.nvim
 ``` lua
 local cmdline_builtin = require('telescomp.cmdline.builtin')
 
+-- complete with `getcompletion`
+vim.keymap.set('c', '<C-X><C-X>', telescomp_builtin.cmdline)
+
 -- complete file names
 vim.keymap.set('c', '<C-X><C-F>', telescomp_builtin.find_files)
 
