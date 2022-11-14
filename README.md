@@ -2,6 +2,8 @@
 
 Fuzzy completion powered by telescope.nvim
 
+**WARNING: THIS PROJECT IS EXPERIMENTAL**
+
 ## Requirements
 
 - Neovim 0.8+
