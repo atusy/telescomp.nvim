@@ -73,10 +73,11 @@ end
 
 local function parse_cmdline(arg)
   local ret = {}
-  ret.cmdline = arg.curline or fn.getcmdline()
-  ret.cmdpos = arg.curpos or (fn.getcmdpos() - 1)
-  ret.left = fn.strpart(ret.cmdline, 0, ret.cmdpos)
-  ret.right = fn.strpart(ret.cmdline, ret.cmdpos)
+  ret.cmdline = arg.cmdline or fn.getcmdline()
+  ret.cmdpos = arg.cmdpos or fn.getcmdpos()
+  local pos = ret.cmdpos - 1
+  ret.left = fn.strpart(ret.cmdline, 0, pos)
+  ret.right = fn.strpart(ret.cmdline, pos)
   ret.default_text = ''
 
   if arg.expand then
