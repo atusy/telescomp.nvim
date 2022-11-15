@@ -24,11 +24,8 @@ vim.keymap.set('c', '<C-X><C-X>', telescomp_builtin.cmdline)
 -- complete file names
 vim.keymap.set('c', '<C-X><C-F>', telescomp_builtin.find_files)
 
--- complete git refs
-vim.keymap.set('c', '<C-X><C-R>', telescomp_builtin.git_ref)
-
 -- chose a source of completions from the menu
-vim.keymap.set('c', '<C-X><C-M>', telescomp_builtin.menu)
+vim.keymap.set('c', '<C-X><C-M>', function() telescomp_builtin() end)
 ```
 
 #### Create your own completions
