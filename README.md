@@ -115,7 +115,7 @@ vim.keymap.set('n', '<Plug>(telescomp-colon)', ':', { remap = true })
 
 #### Conditional completions
 
-Call `find_file` if `default_text` contains "/" and call `menu` otherwise.
+Call `find_file` if `default_text` contains "/" and call `cmdline` otherwise.
 
 ``` lua
 vim.keymap.set('c', '<C-X><C-X>', function()
@@ -127,6 +127,6 @@ vim.keymap.set('c', '<C-X><C-X>', function()
     return cmdline_builtin.find_files({}, opt)
   end
 
-  return cmdline_builtin.menu({}, opt)
+  return cmdline_builtin.cmdline({}, opt)
 end)
 ```
