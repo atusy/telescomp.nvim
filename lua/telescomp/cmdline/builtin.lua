@@ -82,7 +82,11 @@ local function callable(x)
 end
 
 return setmetatable(M, {
-  __index = function(_, key)
+  __index = function(self, key)
+    if key == "builtin" then
+      return function(...) return self(...) end
+    end
+
     local formatter_one = formatters[key]
     local function formatter(tbl)
       -- vim.pretty_print(tbl[1])
