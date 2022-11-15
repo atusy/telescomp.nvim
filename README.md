@@ -111,6 +111,8 @@ Yet, users can still modify the behavior of some keys like below.
 
 ``` lua
 vim.keymap.set('n', '<Plug>(telescomp-colon)', ':', { remap = true })
+vim.keymap.set('n', '<Plug>(telescomp-slash)', '/', { remap = true })
+vim.keymap.set('n', '<Plug>(telescomp-question)', '?', { remap = true })
 ```
 
 #### Conditional completions
