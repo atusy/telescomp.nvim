@@ -97,7 +97,6 @@ instead of `require('telescomp.cmdline.builtin').menu`
 local my_menu = require('telescope.cmdline').create_menu({
   -- keys as names of items in the menu and values as completion functions
   menu = {
-    git_ref = require('telescope.cmdline.builtin').git_ref,
     find_files = require('telescope.cmdline.builtin').find_files,
     git_branch = git_branch,
   },
