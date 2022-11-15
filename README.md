@@ -17,8 +17,14 @@ Fuzzy completion powered by telescope.nvim
 
 **Telescomp** provides variety of pickers from `require('telescomp.cmdline.builtin')`.
 Most of them are modified after `require('telescope.builtin')`.
-In addition, `cmdline` provides completion based on `vim.fn.getcompletion()`.
-Also, `builtin` is a picker of **telescomp**'s builtin pickers like `require('telescope.builtin').builtin`.
+Note that modifications are still work in progress, and some of the pickers may return empty string.
+
+In addition to the modified pickers, there are some original pickers.
+
+- `cmdline` is a picker based on `vim.fn.getcompletion()`.
+- `builtin` is a picker of **telescomp**'s builtin pickers like `require('telescope.builtin').builtin`.
+
+##### Example mappings
 
 ``` lua
 local cmdline_builtin = require('telescomp.cmdline.builtin')
