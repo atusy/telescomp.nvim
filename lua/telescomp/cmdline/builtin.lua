@@ -70,17 +70,6 @@ local formatters = setmetatable({
   end
 })
 
-local function callable(x)
-  if type(x) == 'function' then
-    return true
-  end
-  if type(x) == 'table' then
-    local meta = debug.getmetatable(x)
-    return type(meta) == 'table' and type(meta.__call) == 'function'
-  end
-  return false
-end
-
 return setmetatable(M, {
   __index = function(self, key)
     if key == "builtin" then
@@ -96,10 +85,7 @@ return setmetatable(M, {
     local picker = require('telescope.builtin')[key]
 
     if picker == nil then
-      vim.notify(
-        "telescomp.cmdline.builtin." .. key .. " is not found",
-        vim.log.levels.WARN
-      )
+      utils.warn("telescomp.cmdline.builtin." .. key .. " is not found")
       return function(_, _) end
     end
 
@@ -111,7 +97,7 @@ return setmetatable(M, {
   __call = function(self, ...)
     local menu = utils.copy(self)
     for k, v in pairs(require('telescope.builtin')) do
-      if callable(v) and menu[k] == nil then
+      if utils.callable(v) and menu[k] == nil then
         menu[k] = self[k]
       end
     end

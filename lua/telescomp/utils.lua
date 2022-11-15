@@ -25,4 +25,19 @@ function M.feedkeys(x)
   api.nvim_feedkeys(x, 'n', false)
 end
 
+function M.callable(x)
+  if type(x) == 'function' then
+    return true
+  end
+  if type(x) == 'table' then
+    local meta = debug.getmetatable(x)
+    return type(meta) == 'table' and type(meta.__call) == 'function'
+  end
+  return false
+end
+
+function M.warn(msg)
+  vim.notify(msg, vim.log.levels.WARN)
+end
+
 return M
