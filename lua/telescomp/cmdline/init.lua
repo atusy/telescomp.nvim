@@ -31,11 +31,11 @@ local function complete_cmdline(cmdtype, cmdline, cmdpos)
   -- one time keymap that sets the cmdline and cmdpos
   keymap.set('c', plug_internal, function()
     -- cmdline can be set directly via feedkeys, but I guess this is more robust
-    -- see d810570 for the implementation with feedkeys
+    -- see 836cb415b0d2d954ea781f3178ddeb9e7cfff63a for the implementation with feedkeys
     fn.setcmdline(cmdline)
-    fn.setcmdpos(cmdpos)
     keymap.del('c', plug_internal)
-  end)
+    return '<C-R><C-R>=setcmdpos(' .. cmdpos .. ')[-1]<CR>'
+  end, { expr = true })
 
   feedkeys(replace_termcodes(
     [[<C-\><C-N>]] -- ensure normal mode as next plug mapping is defined in normal mode
