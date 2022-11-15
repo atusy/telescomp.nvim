@@ -58,8 +58,6 @@ M.find_files = cmdline.create_completer({
   picker = require('telescope.builtin').find_files
 })
 
-M.menu = cmdline.create_menu({ menu = M })
-
 local formatters = setmetatable({
   git_branches = function(x) return x.value end,
   git_commits = function(x) return x.value end,
@@ -71,6 +69,17 @@ local formatters = setmetatable({
     return function(x) return x[1] or x.value or x.path or x.filename end
   end
 })
+
+local function callable(x)
+  if type(x) == 'function' then
+    return true
+  end
+  if type(x) == 'table' then
+    local meta = debug.getmetatable(x)
+    return type(meta) == 'table' and type(meta.__call) == 'function'
+  end
+  return false
+end
 
 return setmetatable(M, {
   __index = function(_, key)
@@ -91,5 +100,14 @@ return setmetatable(M, {
       picker = picker,
       opts_completer = { formatter = formatter }
     })
+  end,
+  __call = function(self, ...)
+    local menu = utils.copy(self)
+    for k, v in pairs(require('telescope.builtin')) do
+      if callable(v) and menu[k] == nil then
+        menu[k] = self[k]
+      end
+    end
+    cmdline.create_menu({ menu = menu })(...)
   end
 })
