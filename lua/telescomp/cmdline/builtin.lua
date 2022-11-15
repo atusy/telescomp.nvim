@@ -92,8 +92,15 @@ return setmetatable(M, {
       return table.concat(vim.tbl_map(formatter_one, tbl), ' ')
     end
 
+    local picker = require('telescope.builtin')[key]
+
+    if picker == nil then
+      vim.notify("telescomp.cmdline.builtin." .. key .. " is not found", vim.log.levels.WARN)
+      return function(_, _) end
+    end
+
     return cmdline.create_completer({
-      picker = require('telescope.builtin')[key],
+      picker = picker,
       opts_completer = { formatter = formatter }
     })
   end
