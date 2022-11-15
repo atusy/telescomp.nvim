@@ -152,7 +152,12 @@ function M.create_menu(args)
   }, args.opts)
 
   return function(opts_picker, opts_comp)
+    -- spec completer options except for formatter
+    -- a selected picker from the menu may have default formatter
+    -- thus, this stage should not fallback to format_default
+    local formatter = opts_comp and opts_comp.formatter or nil
     opts_comp = M.spec_completer_options(opts_comp)
+    opts_comp.formatter = formatter
 
     opts_picker = merge(opts_picker_default, opts_picker)
     opts_picker.layout_config = opts_picker.layout_config or { anchor = "SW" }
