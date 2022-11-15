@@ -76,7 +76,7 @@ vim.keymap.set('c', '<C-X>f', find_files)
 
 ``` lua
 local git_branch = require('telescomp.cmdline').create_completer({
-  opts = {
+  opts_picker = {
     finder = function()
       return {
         results = fn.split(fn.system(
