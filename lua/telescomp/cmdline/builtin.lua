@@ -96,7 +96,10 @@ return setmetatable(M, {
     local picker = require('telescope.builtin')[key]
 
     if picker == nil then
-      vim.notify("telescomp.cmdline.builtin." .. key .. " is not found", vim.log.levels.WARN)
+      vim.notify(
+        "telescomp.cmdline.builtin." .. key .. " is not found",
+        vim.log.levels.WARN
+      )
       return function(_, _) end
     end
 
