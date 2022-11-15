@@ -55,11 +55,11 @@ local function picker_mappings(opts)
     local _ = map
     actions.select_default:replace(function()
       local selections = action_state.get_current_picker(prompt_bufnr):get_multi_selection()
-      local middle = opts.formatter(
+      local left = opts.left .. opts.formatter(
         #selections > 1 and selections or { action_state.get_selected_entry() }
       )
-      cmdline = opts.left .. middle .. opts.right
-      cmdpos = fn.strlen(cmdline) + 1
+      cmdline = left .. opts.right
+      cmdpos = fn.strlen(left) + 1
       actions.close(prompt_bufnr)
     end)
     actions.close:enhance({
