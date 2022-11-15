@@ -86,7 +86,7 @@ return setmetatable(M, {
 
     if picker == nil then
       utils.warn("telescomp.cmdline.builtin." .. key .. " is not found")
-      return function(_, _) end
+      return
     end
 
     return cmdline.create_completer({
