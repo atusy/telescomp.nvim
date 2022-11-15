@@ -6,18 +6,6 @@ local utils = require('telescomp.utils')
 
 local M = {}
 
-M.git_ref = cmdline.create_completer({
-  opts_picker = {
-    finder = function()
-      return {
-        results = fn.split(fn.system(
-          [[git for-each-ref --format="%(refname:short)"]]
-        ), "\n"),
-      }
-    end
-  }
-})
-
 local function getcompletion(opts_comp)
   local left = opts_comp.left
   local default_text = opts_comp.default_text
