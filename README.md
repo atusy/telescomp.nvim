@@ -13,7 +13,7 @@ Fuzzy completion powered by telescope.nvim
 
 ### cmdline
 
-#### Assign keymaps to run completions
+#### Builtin pickers
 
 **Telescomp** provides variety of pickers from `require('telescomp.cmdline.builtin')`.
 Most of them are modified after `require('telescope.builtin')`.
