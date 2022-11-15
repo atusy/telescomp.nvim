@@ -15,17 +15,22 @@ Fuzzy completion powered by telescope.nvim
 
 #### Assign keymaps to run completions
 
+**Telescomp** provides variety of pickers from `require('telescomp.cmdline.builtin')`.
+Most of them are modified after `require('telescope.builtin')`.
+In addition, `cmdline` provides completion based on `vim.fn.getcompletion()`.
+Also, `builtin` is a picker of **telescomp**'s builtin pickers like `require('telescope.builtin').builtin`.
+
 ``` lua
 local cmdline_builtin = require('telescomp.cmdline.builtin')
 
 -- complete with `getcompletion`
 vim.keymap.set('c', '<C-X><C-X>', telescomp_builtin.cmdline)
 
--- complete file names
+-- complete file names powered by telescope.builtin.find_files
 vim.keymap.set('c', '<C-X><C-F>', telescomp_builtin.find_files)
 
--- chose a source of completions from the menu
-vim.keymap.set('c', '<C-X><C-M>', function() telescomp_builtin() end)
+-- chose a picker from a list of builtin pickers
+vim.keymap.set('c', '<C-X><C-M>', telescomp_builtin.builtin)
 ```
 
 #### Create your own completions
