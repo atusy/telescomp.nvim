@@ -18,7 +18,9 @@ local function getcompletion(opts_comp)
   return completion
 end
 
-local function clean_pattern(x, y)
+local function get_prefix(x, y)
+  -- x = "'<,'>s", y = "substitute" -> "'<,'>"
+  -- x = "vim.api.nv", y = "nvim_exec" -> "vim.api."
   if y == nil then return '' end
   local n = fn.strchars(x)
   if n == 0 then return x end
@@ -50,9 +52,7 @@ function M.cmdline(opts_picker, opts_comp)
   )
 
   -- update opts_comp
-  if startswith(opts_comp.left, 'lua ') then
-    opts_comp.left = opts_comp.left .. clean_pattern(opts_comp.default_text, results[1])
-  end
+  opts_comp.left = opts_comp.left .. get_prefix(opts_comp.default_text, results[1])
   opts_comp.default_text = ''
 
   _complete(opts_picker, opts_comp)
