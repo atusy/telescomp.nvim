@@ -37,7 +37,6 @@ local _complete = cmdline.create_completer({
 })
 
 function M.cmdline(opts_picker, opts_comp)
-  local cmdcompltype = fn.getcmdcompltype()
   -- setup opts_comp
   opts_comp = cmdline.spec_completer_options(opts_comp)
 
@@ -45,7 +44,7 @@ function M.cmdline(opts_picker, opts_comp)
   local results = getcompletion(opts_comp)
   opts_picker = utils.merge(
     {
-      prompt_title = 'Complete cmdline (' .. cmdcompltype .. ')',
+      prompt_title = 'Complete cmdline (' .. opts_comp.cmdcompltype .. ')',
       finder = require('telescope.finders').new_table({ results = results })
     },
     opts_picker

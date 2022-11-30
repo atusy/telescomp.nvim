@@ -102,6 +102,7 @@ function M.spec_completer_options(opts)
     opts.default_text = opts.default_text or ''
   end
   opts.cmdtype = opts.cmdtype or fn.getcmdtype()
+  opts.cmdcompltype = opts.cmdcompltype or fn.getcmdcompltype()
   opts.formatter = opts.formatter or format_default
   return opts
 end
