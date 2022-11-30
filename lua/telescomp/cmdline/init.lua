@@ -24,10 +24,6 @@ local plug_cmd = {
 local plug_internal = '<Plug>(telescomp-cmd-internal)'
 
 local function complete_cmdline(cmdtype, cmdline, cmdpos)
-  if not plug_cmd[cmdtype] then
-    error("telescomp does not support cmdtype " .. cmdtype)
-  end
-
   -- one time keymap that sets the cmdline and cmdpos
   keymap.set('c', plug_internal, function()
     -- cmdline can be set directly via feedkeys, but I guess this is more robust
@@ -110,6 +106,12 @@ function M.spec_completer_options(opts)
   return opts
 end
 
+local function validate_cmdtype(cmdtype)
+  if not plug_cmd[cmdtype] then
+    error("telescomp does not support cmdtype " .. cmdtype)
+  end
+end
+
 function M.create_completer(args)
   local picker = args.picker
   local opts_picker_default = copy(args.opts_picker or {})
@@ -117,6 +119,7 @@ function M.create_completer(args)
 
   return function(opts_picker, opts_comp)
     opts_comp = M.spec_completer_options(merge(opts_comp_user_default, opts_comp))
+    validate_cmdtype(opts_comp.cmdtype)
 
     opts_picker = merge(opts_picker_default, opts_picker)
     opts_picker.default_text = opts_comp.default_text or opts_picker.default_text
@@ -158,6 +161,7 @@ function M.create_menu(args)
     -- thus, this stage should not fallback to format_default
     local formatter = opts_comp and opts_comp.formatter or nil
     opts_comp = M.spec_completer_options(opts_comp)
+    validate_cmdtype(opts_comp.cmdtype)
     opts_comp.formatter = formatter
 
     opts_picker = merge(opts_picker_default, opts_picker)
